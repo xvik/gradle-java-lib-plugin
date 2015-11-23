@@ -16,7 +16,15 @@ abstract class AbstractKitTest extends Specification {
     final TemporaryFolder testProjectDir = new TemporaryFolder()
     File buildFile
 
+    List<File> pluginClasspath
+
     def setup() {
+        def pluginClasspathResource = getClass().classLoader.findResource("plugin-classpath.txt")
+        if (pluginClasspathResource == null) {
+            throw new IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")
+        }
+        pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
+
         buildFile = testProjectDir.newFile('build.gradle')
         // override maven local repository
         // (see org.gradle.api.internal.artifacts.mvnsettings.DefaultLocalMavenRepositoryLocator.getLocalMavenRepository)
@@ -42,13 +50,10 @@ abstract class AbstractKitTest extends Specification {
     }
 
     GradleRunner gradle(String... commands) {
-        // tests will be called after deps resolution, so dep will be in local repo for sure
-        def file = new File(System.getProperty('user.home') + '/.m2/repository/ru/vyarus/gradle-pom-plugin/1.0.0/gradle-pom-plugin-1.0.0.jar')
-        assert file.exists()
         GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
                 .withArguments((commands + ['--stacktrace']) as String[])
-                .withPluginClasspath([new File('build/classes/main'), new File('build/resources/main'), file])
+                .withPluginClasspath(pluginClasspath)
     }
 
     BuildResult run(String... commands) {

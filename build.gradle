@@ -17,11 +17,24 @@ wrapper {
     gradleVersion = 2.8
 }
 
+task createClasspathManifest {
+    def outputDir = file("$buildDir/$name")
+
+    inputs.files sourceSets.main.runtimeClasspath
+    outputs.dir outputDir
+
+    doLast {
+        outputDir.mkdirs()
+        file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
+    }
+}
+
 repositories { jcenter() }
 dependencies {
     compile 'ru.vyarus:gradle-pom-plugin:1.0.0'
 
     testCompile gradleTestKit()
+    testRuntime files(createClasspathManifest)
     testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
         exclude module: 'groovy-all'
     }
