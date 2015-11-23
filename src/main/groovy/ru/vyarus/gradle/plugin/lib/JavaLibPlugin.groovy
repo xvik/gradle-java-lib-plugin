@@ -2,6 +2,7 @@ package ru.vyarus.gradle.plugin.lib
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.maven.MavenPublication
@@ -52,15 +53,14 @@ class JavaLibPlugin implements Plugin<Project> {
             // delayed to be able to use version
             afterEvaluate {
                 // do not override user attributes
-                jar.manifest.attributes.with {
-                    putIfAbsent('Implementation-Title', project.description ?: project.name)
-                    putIfAbsent('Implementation-Version', project.version)
-                    putIfAbsent('Built-By', System.getProperty('user.name'))
-                    putIfAbsent('Built-Date', new Date())
-                    putIfAbsent('Built-JDK', System.getProperty('java.version'))
-                    putIfAbsent('Built-Gradle', project.gradle.gradleVersion)
-                    putIfAbsent('Target-JDK', project.targetCompatibility)
-                }
+                Attributes attributes = jar.manifest.attributes
+                putIfAbsent(attributes, 'Implementation-Title', project.description ?: project.name)
+                putIfAbsent(attributes, 'Implementation-Version', project.version)
+                putIfAbsent(attributes, 'Built-By', System.getProperty('user.name'))
+                putIfAbsent(attributes, 'Built-Date', new Date())
+                putIfAbsent(attributes, 'Built-JDK', System.getProperty('java.version'))
+                putIfAbsent(attributes, 'Built-Gradle', project.gradle.gradleVersion)
+                putIfAbsent(attributes, 'Target-JDK', project.targetCompatibility)
             }
 
             model {
@@ -149,6 +149,12 @@ class JavaLibPlugin implements Plugin<Project> {
             doLast {
                 logger.warn "INSTALLED $project.group:$project.name:$project.version"
             }
+        }
+    }
+
+    private void putIfAbsent(Attributes attributes, String name, Object value) {
+        if (!attributes.containsKey(name)) {
+            attributes.put(name, value)
         }
     }
 }
