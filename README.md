@@ -137,7 +137,7 @@ Also, plugin will include pom file inside jar (like maven do): META-INF/maven/gr
 
 #### Publication
 
-[`maven-publish`](https://docs.gradle.org/current/userguide/publishing_maven.html) plugin is used for publication.
+[maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html) plugin is used for publication.
 
 By default plugin configures `maven` publication with javadoc or (and) groovydoc and sources jars. 
 
