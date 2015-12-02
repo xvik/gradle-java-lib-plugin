@@ -113,7 +113,9 @@ class JavaLibPlugin implements Plugin<Project> {
                     groovydocJar {
                         dependsOn groovydoc
                         group BUILD_GROUP
-                        classifier 'groovydoc'
+                        // very important to have at least one javadoc package, because otherwise maven cantral
+                        // would not accept package
+                        classifier project.tasks.findByName(JAVADOC_JAR) ? 'groovydoc' : 'javadoc'
                         from groovydoc.destinationDir
                     }
                 }

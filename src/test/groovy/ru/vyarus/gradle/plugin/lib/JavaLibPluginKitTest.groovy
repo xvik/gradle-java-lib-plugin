@@ -66,8 +66,9 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
+        // javadoc will be produced instead of groovydoc! important for maven central
         deploy.list() as Set ==
-                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-groovydoc.jar"] as Set<String>
+                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
     def "Check install for both sources"() {
