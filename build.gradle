@@ -54,7 +54,7 @@ jar {
 
 task groovydocJar(type: Jar, dependsOn: groovydoc, group: 'build') {
     from groovydoc.destinationDir
-    classifier = 'groovydoc'
+    classifier = 'javadoc'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes, group: 'build') {
@@ -63,7 +63,7 @@ task sourcesJar(type: Jar, dependsOn: classes, group: 'build') {
 }
 
 def pomConfig = {
-    name project.description
+    name project.name
     url 'https://github.com/xvik/gradle-java-lib-plugin'
     licenses {
         license {
@@ -94,7 +94,7 @@ publishing {
             artifact sourcesJar
 
             pom.withXml {
-                asNode().appendNode('description', 'Common gradle configuration for Java/Groovy library')
+                asNode().appendNode('description', project.description)
                 asNode().children().last() + pomConfig
             }
         }
