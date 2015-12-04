@@ -31,7 +31,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.0'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.1'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -41,7 +41,7 @@ OR (waiting for approve)
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '1.0.0'
+    id 'ru.vyarus.java-lib' version '1.0.1'
 }
 ```
 
@@ -73,6 +73,11 @@ dependencies {
 - `sourcesJar` task is always applied 
 - `javadocJar` if java sources directory present ('src/main/java')
 - `groovydocJar` if groovy plugin available and groovy sources present ('src/main/groovy'). Last condition is important because groovy may be used only for tests.
+
+IMPORTANT: if you have only groovy sources then `groovydocJar` will have javadoc` classifier! This is because maven central requires
+javadoc jar, so even if you write groovy project you have to name it javadoc.
+
+In case of both groovy and java sources, `groovydocJar` will use `groovydoc` classifier, because `javadocJar` already use `javadoc` and have to produce separate artifacts. 
 
 #### Pom
 
@@ -195,11 +200,26 @@ jar {
     }
 }
 
+task generatePomPropertiesFile {
+    inputs.properties ([
+            'version': "${->project.version}",
+            'groupId': "${->project.group}",
+            'artifactId': "${->project.name}"
+    ])
+    outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
+    doLast {
+        File file = outputs.files.singleFile
+        file.parentFile.mkdirs()
+        file << inputs.properties.collect{key, value -> "$key: $value"}.join('\n')
+    }
+}
+
 model {
     tasks.jar {
         into("META-INF/maven/$project.group/$project.name") {
             from generatePomFileForMavenPublication
-            rename ".*", "pom.xml"
+            rename ".*.xml", "pom.xml"
+            from generatePomPropertiesFile
         }
     }
 }

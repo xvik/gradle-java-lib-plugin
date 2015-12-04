@@ -12,10 +12,10 @@ import ru.vyarus.gradle.plugin.pom.PomPlugin
 /**
  * Plugin performs common configuration for java or groovy library:
  * <ul>
- *     <li> Fills manifest for main jar and add pom inside jar (as maven do)
+ *     <li> Fills manifest for main jar, add pom and generated pom.properties inside jar (as maven do)
  *     <li> Add sourcesJar task
  *     <li> Add javadocJar or (and) groovydocJar tasks
- *     <li> Configures maven publication named 'maven' with all jars (jar, sources java(groovy)dock)
+ *     <li> Configures maven publication named 'maven' with all jars (jar, sources, javadock and maybe groovydoc)
  *     <li> Applies 'ru.vyarus.pom' plugin which fixes pom dependencies, adds provided and optional support and
  *     'pom' closure fot simpler pom configuration
  *     <li> Add 'install' task as shortcut for publishToMavenLocal
@@ -48,6 +48,19 @@ class JavaLibPlugin implements Plugin<Project> {
     }
 
     private void configureJar(Project project) {
+        project.tasks.create('generatePomPropertiesFile') {
+            inputs.properties([
+                    'version'   : "${-> project.version}",
+                    'groupId'   : "${-> project.group}",
+                    'artifactId': "${-> project.name}"
+            ])
+            outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
+            doLast {
+                File file = outputs.files.singleFile
+                file.parentFile.mkdirs()
+                file << inputs.properties.collect { key, value -> "$key: $value" }.join('\n')
+            }
+        }
         project.configure(project) {
 
             // delayed to be able to use version
@@ -67,7 +80,8 @@ class JavaLibPlugin implements Plugin<Project> {
                 tasks.jar {
                     into("META-INF/maven/$project.group/$project.name") {
                         from generatePomFileForMavenPublication
-                        rename '.*', 'pom.xml'
+                        rename '.*.xml', 'pom.xml'
+                        from generatePomPropertiesFile
                     }
                 }
             }

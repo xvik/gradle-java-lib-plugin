@@ -45,6 +45,14 @@ class JarModificationKitTest extends AbstractKitTest {
         String jarPom = jar.getInputStream(jar.getEntry("META-INF/maven/ru.vyarus/$artifactId/pom.xml")).text
         jarPom != null
         println jarPom
+
+        then: "jar contains pom.properties"
+        String props = jar.getInputStream(jar.getEntry("META-INF/maven/ru.vyarus/$artifactId/pom.properties")).text
+        props != null
+        println props
+        props.contains('groupId: ru.vyarus')
+        props.contains("artifactId: ${projectName()}")
+        props.contains('version: 1.0')
     }
 
     def "Check jar manifest override"() {
