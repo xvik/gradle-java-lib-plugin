@@ -22,7 +22,7 @@ import ru.vyarus.gradle.plugin.pom.PomPlugin
  * </ul>
  * Plugin must be registered after java or groovy plugins, otherwise wil do nothing.
  *
- * @author Vyacheslav Rusakov 
+ * @author Vyacheslav Rusakov
  * @since 07.11.2015
  */
 @SuppressWarnings('DuplicateStringLiteral')
@@ -50,9 +50,9 @@ class JavaLibPlugin implements Plugin<Project> {
     private void configureJar(Project project) {
         project.tasks.create('generatePomPropertiesFile') {
             inputs.properties([
-                    'version'   : "${-> project.version}",
-                    'groupId'   : "${-> project.group}",
-                    'artifactId': "${-> project.name}"
+                    'version': "${ -> project.version }",
+                    'groupId': "${ -> project.group }",
+                    'artifactId': "${ -> project.name }"
             ])
             outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
             doLast {
@@ -150,7 +150,6 @@ class JavaLibPlugin implements Plugin<Project> {
                         if (project.tasks.findByName(GROOVYDOC_JAR)) {
                             artifact groovydocJar
                         }
-
                     }
                 }
             }
