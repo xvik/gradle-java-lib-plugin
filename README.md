@@ -6,7 +6,7 @@
 
 Plugin applies common configuration for java or groovy library: 
 
-* Configure `jar` with default manifest and pom inside jar (like maven do)
+* Configure `jar` with default manifest and put pom.xml and pom.properties inside jar (like maven do)
 * Add `sourcesJar` task
 * Add `javadocJar` or (and) `groovydocJar` tasks
 * Configures maven publication named `maven` with all jars (jar, sources javadock or (and) groovydoc)
@@ -21,9 +21,12 @@ then you will have to perform additional configuration or, maybe (depends on cas
 
 ### Setup
 
-Releases are published to [bintray jcenter](https://bintray.com/bintray/jcenter) and [gradle plugins portal](https://plugins.gradle.org).
+Releases are published to [bintray jcenter](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/), 
+[maven central](https://maven-badges.herokuapp.com/maven-central/ru.vyarus/gradle-java-lib-plugin) and 
+[gradle plugins portal](https://plugins.gradle.org/plugin/ru.vyarus.java-lib).
 
 [![JCenter](https://img.shields.io/bintray/v/vyarus/xvik/gradle-java-lib-plugin.svg?label=jcenter)](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/_latestVersion)
+[![Maven Central](https://img.shields.io/maven-central/v/ru.vyarus/gradle-java-lib-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/ru.vyarus/gradle-java-lib-plugin)
 
 ```groovy
 buildscript {
@@ -152,7 +155,15 @@ Use 'install' task to deploy jars into local maven repository.
 $ gradlew install
 ``` 
 
-#### Publish to repository 
+If you dont want to publish everything (jar, sources, javadoc) then you can override list of publishing artifacts:
+
+```groovy
+publishing.publications.maven.artifacts = [jar, javadocJar]
+```
+
+Here sources are excluded from publishing.
+
+##### Publish to repository 
  
 For actual publication only [repository](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:repositories) must be configured:
 
@@ -169,7 +180,7 @@ publishing {
 
 Then [publish task](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publishing) may be used to perform publish. 
 
-#### Publish to bintray
+##### Publish to bintray
  
 If you publish to [bintray](https://bintray.com/), then you need to reference `maven` publication 
 in [bintray plugin](https://github.com/bintray/gradle-bintray-plugin) configuration:
@@ -181,80 +192,12 @@ bintray {
 }    
 ```
 
-### Boilerplate plugin removes
-
-Just for reference, here is what plugin did for java project:
-
-```groovy
-apply plugin: 'ru.vyarus.pom'
-
-jar {    
-    manifest {
-        attributes 'Implementation-Title': project.description ?: project.name,
-                'Implementation-Version': project.version,
-                'Built-By': System.getProperty('user.name'),
-                'Built-Date': new Date(),
-                'Built-JDK': System.getProperty('java.version'),
-                'Built-Gradle': gradle.gradleVersion,
-                'Target-JDK': project.targetCompatibility
-    }
-}
-
-task generatePomPropertiesFile {
-    inputs.properties ([
-            'version': "${->project.version}",
-            'groupId': "${->project.group}",
-            'artifactId': "${->project.name}"
-    ])
-    outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
-    doLast {
-        File file = outputs.files.singleFile
-        file.parentFile.mkdirs()
-        file << inputs.properties.collect{key, value -> "$key: $value"}.join('\n')
-    }
-}
-
-model {
-    tasks.jar {
-        into("META-INF/maven/$project.group/$project.name") {
-            from generatePomFileForMavenPublication
-            rename ".*.xml", "pom.xml"
-            from generatePomPropertiesFile
-        }
-    }
-}
-
-task sourcesJar(type: Jar, dependsOn: classes, group: 'build') {
-	from sourceSets.main.allSource
-	classifier = 'sources'
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc, group: 'build') {
-	classifier 'javadoc'
-        from javadoc.destinationDir
-}
-
-publishing {
-	publications {
-	    maven(MavenPublication) {
-	        from components.java
-	        artifact sourcesJar	        
-	        artifact javadocJar	        
-	    }
-	}
-}
-
-task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
-	logger.warn "INSTALLED $project.group:$project.name:$project.version"
-}
-```
-
 ### Complete usage example
 
 ```groovy
 plugins {
     id 'java'
-    id 'ru.vyarus.java-lib' version '1.0.0'
+    id 'ru.vyarus.java-lib' version '1.0.1'
     id 'com.jfrog.bintray' version '1.4'
 }
 
@@ -299,4 +242,72 @@ bintray {
     publications = ['maven']
     ...
 }  
+```
+
+### Boilerplate plugin removes
+
+Just for reference, here is what plugin did for java project:
+
+```groovy
+apply plugin: 'ru.vyarus.pom'
+
+jar {    
+    manifest {
+        attributes 'Implementation-Title': project.description ?: project.name,
+                'Implementation-Version': project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Built-Gradle': gradle.gradleVersion,
+                'Target-JDK': project.targetCompatibility
+    }
+}
+
+task generatePomPropertiesFile {
+    inputs.properties ([
+            'version': "${ -> project.version }",
+            'groupId': "${ -> project.group }",
+            'artifactId': "${ -> project.name }"
+    ])
+    outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
+    doLast {
+        File file = outputs.files.singleFile
+        file.parentFile.mkdirs()
+        file << inputs.properties.collect{ key, value -> "$key: $value" }.join('\n')
+    }
+}
+
+model {
+    tasks.jar {
+        into("META-INF/maven/$project.group/$project.name") {
+            from generatePomFileForMavenPublication
+            rename ".*.xml", "pom.xml"
+            from generatePomPropertiesFile
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes, group: 'build') {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc, group: 'build') {
+	classifier 'javadoc'
+        from javadoc.destinationDir
+}
+
+publishing {
+	publications {
+	    maven(MavenPublication) {
+	        from components.java
+	        artifact sourcesJar	        
+	        artifact javadocJar	        
+	    }
+	}
+}
+
+task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
+	logger.warn "INSTALLED $project.group:$project.name:$project.version"
+}
 ```
