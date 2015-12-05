@@ -8,7 +8,7 @@ import org.gradle.testkit.runner.TaskOutcome
  */
 class PublicationOverrideTest extends AbstractKitTest {
 
-    def "Check install task"() {
+    def "Check publication override"() {
         setup:
         file('src/main/java').mkdirs()
         build """
@@ -34,7 +34,7 @@ class PublicationOverrideTest extends AbstractKitTest {
         result.task(":install").outcome == TaskOutcome.SUCCESS
         result.standardOutput.contains("INSTALLED ru.vyarus:$artifactId:1.0")
 
-        then: "artifacts deployed"
+        then: "artifacts deployed, but without sources"
         deploy.exists()
         def baseName = artifactId + '-1.0'
         deploy.list() as Set ==
