@@ -141,7 +141,14 @@ jar {
 
 For all not specified properties default values will be used.
 
-Also, plugin will include pom file inside jar (like maven do): META-INF/maven/group/artifact/pom.xml.
+Plugin will include additional files inside jar (like maven do) into `META-INF/maven/group/artifact/`
+* pom.xml
+* pom.properties
+
+pom.properties contains:
+* version
+* groupId
+* artifactId
 
 #### Publication
 
