@@ -30,7 +30,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
 
         then: "task done"
         result.task(":install").outcome == TaskOutcome.SUCCESS
-        result.standardOutput.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
 
         then: "artifacts deployed"
         deploy.exists()
@@ -61,7 +61,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
 
         then: "task done"
         result.task(":install").outcome == TaskOutcome.SUCCESS
-        result.standardOutput.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
 
         then: "artifacts deployed"
         deploy.exists()
@@ -94,7 +94,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
 
         then: "task done"
         result.task(":install").outcome == TaskOutcome.SUCCESS
-        result.standardOutput.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
 
         then: "artifacts deployed"
         deploy.exists()
@@ -124,7 +124,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
 
         then: "task done"
         result.task(":install").outcome == TaskOutcome.SUCCESS
-        result.standardOutput.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
 
         then: "artifacts deployed"
         deploy.exists()
@@ -156,7 +156,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
 
         then: "task done"
         result.task(":install").outcome == TaskOutcome.SUCCESS
-        result.standardOutput.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
 
         then: "artifacts deployed"
         deploy.exists()
