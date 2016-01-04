@@ -89,7 +89,7 @@ Most likely, you will need to configure pom:
 ```groovy
 pom {
     name 'Project Name'
-    description 'My awesome project
+    description 'My awesome project'
     licenses {
         license {
             name "The MIT License"
