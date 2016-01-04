@@ -223,7 +223,7 @@ dependencies {
 
 pom {
     name 'Project Name'
-    description 'My awesome project
+    description 'My awesome project'
     licenses {
         license {
             name "The MIT License"
