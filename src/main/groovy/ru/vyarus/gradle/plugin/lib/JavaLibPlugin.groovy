@@ -52,7 +52,7 @@ class JavaLibPlugin implements Plugin<Project> {
             inputs.properties([
                     'version': "${ -> project.version }",
                     'groupId': "${ -> project.group }",
-                    'artifactId': "${ -> project.name }"
+                    'artifactId': "${ -> project.name }",
             ])
             outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
             doLast {
