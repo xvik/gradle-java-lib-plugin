@@ -31,7 +31,7 @@ task createClasspathManifest {
 
 repositories { jcenter() }
 dependencies {
-    compile 'ru.vyarus:gradle-pom-plugin:1.0.1'
+    compile 'ru.vyarus:gradle-pom-plugin:1.0.2'
 
     testCompile gradleTestKit()
     testRuntime files(createClasspathManifest)
