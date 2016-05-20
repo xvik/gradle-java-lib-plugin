@@ -34,17 +34,17 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.1'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.2'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
 ```
 
-OR (waiting for approve)
+OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '1.0.1'
+    id 'ru.vyarus.java-lib' version '1.0.2'
 }
 ```
 
@@ -318,3 +318,13 @@ task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
 	logger.warn "INSTALLED $project.group:$project.name:$project.version"
 }
 ```
+
+### Might also like
+
+* [quality-plugin](https://github.com/xvik/gradle-quality-plugin) - java and groovy source quality checks
+* [github-info-plugin](https://github.com/xvik/gradle-github-info-plugin) - pre-configure common plugins with github related info
+* [animalsniffer-plugin](https://github.com/xvik/gradle-animalsniffer-plugin) - java compatibility checks
+* [java-library generator](https://github.com/xvik/generator-lib-java) - java library project generator
+
+-
+[![gradle plugin generator](http://img.shields.io/badge/Powered%20by-%20Gradle%20plugin%20generator-green.svg?style=flat-square)](https://github.com/xvik/generator-gradle-plugin)

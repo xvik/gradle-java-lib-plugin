@@ -1,3 +1,4 @@
+### 1.0.2 (2016-05-20)
 * Update pom plugin (fix pom dependencies scopes update)
 
 ### 1.0.1 (2015-12-05)
