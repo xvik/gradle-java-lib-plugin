@@ -18,7 +18,7 @@ wrapper {
 
 repositories { jcenter() }
 dependencies {
-    compile 'ru.vyarus:gradle-pom-plugin:1.0.2'
+    compile 'ru.vyarus:gradle-pom-plugin:1.0.3'
 
     testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
         exclude module: 'groovy-all'

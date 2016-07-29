@@ -1,3 +1,5 @@
+* Update pom plugin (fix pom closure merge for repeatable tags like developers)
+
 ### 1.0.2 (2016-05-20)
 * Update pom plugin (fix pom dependencies scopes update)
 
