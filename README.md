@@ -34,7 +34,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.2'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.3'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -44,7 +44,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '1.0.2'
+    id 'ru.vyarus.java-lib' version '1.0.3'
 }
 ```
 
