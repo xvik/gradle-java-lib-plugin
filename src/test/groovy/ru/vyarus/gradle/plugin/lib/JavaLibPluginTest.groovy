@@ -1,7 +1,6 @@
 package ru.vyarus.gradle.plugin.lib
 
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPlugin
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
 /**

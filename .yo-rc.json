@@ -1,0 +1,23 @@
+{
+  "generator-gradle-plugin": {
+    "githubUser": "xvik",
+    "authorName": "Vyacheslav Rusakov",
+    "authorEmail": "vyarus@gmail.com",
+    "projectName": "gradle-java-lib-plugin",
+    "projectGroup": "ru.vyarus",
+    "projectPackage": "ru.vyarus.gradle.plugin.lib",
+    "projectVersion": "0.1.0",
+    "projectDesc": "Gradle Java-lib plugin",
+    "pluginPortalDesc": "Common gradle configuration for Java or Groovy library",
+    "targetJava": "1.6",
+    "pluginPortalTags": "java, groovy, lib",
+    "mirrorToJcenter": true,
+    "pluginPortalUseCustomGroup": true,
+    "bintrayUser": "vyarus",
+    "bintrayRepo": "xvik",
+    "bintrayTags": "gradle, java, groovy, lib",
+    "bintraySignFiles": true,
+    "mavenCentralSync": true,
+    "usedGeneratorVersion": "1.2.0"
+  }
+}
