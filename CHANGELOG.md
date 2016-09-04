@@ -1,3 +1,5 @@
+* Update pom plugin (fix non string values support, add clashing tag names workaround, add manual xml configuration shortcut)
+
 ### 1.0.3 (2016-07-29)
 * Update pom plugin (fix pom closure merge for repeatable tags like developers)
 
