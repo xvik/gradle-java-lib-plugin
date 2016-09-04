@@ -15,6 +15,7 @@ Plugin applies common configuration for java or groovy library:
   - Adds `optional` and `provided` configurations (affect only resulted pom)
   - Fix dependencies scopes in generated pom (from default runtime)
   - Add `pom` configuration closure to avoid maven-publish's withXml.
+  - Add `withPomXml` configuration closure to use if you need manual xml configuration (after pom closure appliance)
 
 If you need [multiple publications](https://docs.gradle.org/current/userguide/publishing_maven.html#N17EB8) from the same project, 
 then you will have to perform additional configuration or, maybe (depends on case), use only [pom plugin](https://github.com/xvik/gradle-pom-plugin). 
@@ -34,7 +35,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.3'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.4'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -44,7 +45,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '1.0.3'
+    id 'ru.vyarus.java-lib' version '1.0.4'
 }
 ```
 
@@ -204,8 +205,8 @@ bintray {
 ```groovy
 plugins {
     id 'java'
-    id 'ru.vyarus.java-lib' version '1.0.1'
-    id 'com.jfrog.bintray' version '1.4'
+    id 'ru.vyarus.java-lib' version '1.0.4'
+    id 'com.jfrog.bintray' version '1.7.1'
 }
 
 group = 'com.sample' 
@@ -213,7 +214,6 @@ version = '1.0.0'
 description = 'Sample project'
 
 sourceCompatibility = 1.6
-targetCompatibility = 1.6
 
 repositories { jcenter() }
 dependencies {    
@@ -301,7 +301,12 @@ task sourcesJar(type: Jar, dependsOn: classes, group: 'build') {
 
 task javadocJar(type: Jar, dependsOn: javadoc, group: 'build') {
 	classifier 'javadoc'
-        from javadoc.destinationDir
+    from javadoc.destinationDir
+}
+
+task groovydocJar(type: Jar, dependsOn: groovydoc, group: 'build') {
+	classifier 'groovydoc'
+    from groovydoc.destinationDir
 }
 
 publishing {
@@ -309,7 +314,8 @@ publishing {
 	    maven(MavenPublication) {
 	        from components.java
 	        artifact sourcesJar	        
-	        artifact javadocJar	        
+	        artifact javadocJar
+	        artifact groovydocJar	 
 	    }
 	}
 }
