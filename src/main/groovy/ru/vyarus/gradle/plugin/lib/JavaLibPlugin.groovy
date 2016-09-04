@@ -1,5 +1,7 @@
 package ru.vyarus.gradle.plugin.lib
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.java.archives.Attributes
@@ -26,6 +28,7 @@ import ru.vyarus.gradle.plugin.pom.PomPlugin
  * @since 07.11.2015
  */
 @SuppressWarnings('DuplicateStringLiteral')
+@CompileStatic(TypeCheckingMode.SKIP)
 class JavaLibPlugin implements Plugin<Project> {
 
     private static final String BUILD_GROUP = 'build'
