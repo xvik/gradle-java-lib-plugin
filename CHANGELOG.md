@@ -1,3 +1,5 @@
+* Update pom plugin (support gradle java-library plugin)
+
 ### 1.0.4 (2016-09-05)
 * Update pom plugin (fix non string values support, add clashing tag names workaround, add manual xml configuration shortcut)
 

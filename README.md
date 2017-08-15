@@ -1,6 +1,6 @@
 # Gradle Java-lib plugin
-[![License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://www.opensource.org/licenses/MIT)
-[![Build Status](http://img.shields.io/travis/xvik/gradle-java-lib-plugin.svg)](https://travis-ci.org/xvik/gradle-java-lib-plugin)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://www.opensource.org/licenses/MIT)
+[![Build Status](https://img.shields.io/travis/xvik/gradle-java-lib-plugin.svg)](https://travis-ci.org/xvik/gradle-java-lib-plugin)
 
 ### About
 
@@ -11,7 +11,7 @@ Plugin applies common configuration for java or groovy library:
 * Add `javadocJar` or (and) `groovydocJar` tasks
 * Configures maven publication named `maven` with all jars (jar, sources javadock or (and) groovydoc)
 * Add `install` task as shortcut for publishToMavenLocal
-* Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) plugin which: 
+* Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) which: 
   - Adds `optional` and `provided` configurations (affect only resulted pom)
   - Fix dependencies scopes in generated pom (from default runtime)
   - Add `pom` configuration closure to avoid maven-publish's withXml.
@@ -332,5 +332,5 @@ task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
 * [animalsniffer-plugin](https://github.com/xvik/gradle-animalsniffer-plugin) - java compatibility checks
 * [java-library generator](https://github.com/xvik/generator-lib-java) - java library project generator
 
--
+---
 [![gradle plugin generator](http://img.shields.io/badge/Powered%20by-%20Gradle%20plugin%20generator-green.svg?style=flat-square)](https://github.com/xvik/generator-gradle-plugin)
