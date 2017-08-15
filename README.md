@@ -11,14 +11,19 @@ Plugin applies common configuration for java or groovy library:
 * Add `javadocJar` or (and) `groovydocJar` tasks
 * Configures maven publication named `maven` with all jars (jar, sources javadock or (and) groovydoc)
 * Add `install` task as shortcut for publishToMavenLocal
-* Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) which: 
+* Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) which:   
+  - Fix [dependencies scopes](https://github.com/xvik/gradle-pom-plugin#java-and-groovy-plugins) 
+  in generated pom
+  - Add `pom` configuration closure to [simplify pom definition](https://github.com/xvik/gradle-pom-plugin#pom-configuration).
+  - Add `withPomXml` configuration closure to use if you [need manual xml configuration](https://github.com/xvik/gradle-pom-plugin#manual-pom-modification) 
   - Adds `optional` and `provided` configurations (affect only resulted pom)
-  - Fix dependencies scopes in generated pom (from default runtime)
-  - Add `pom` configuration closure to avoid maven-publish's withXml.
-  - Add `withPomXml` configuration closure to use if you need manual xml configuration (after pom closure appliance)
 
 If you need [multiple publications](https://docs.gradle.org/current/userguide/publishing_maven.html#N17EB8) from the same project, 
 then you will have to perform additional configuration or, maybe (depends on case), use only [pom plugin](https://github.com/xvik/gradle-pom-plugin). 
+
+**Confusion point**: plugin named almost the same as gradle's own [java-library plugin](https://docs.gradle.org/current/userguide/java_library_plugin.html),
+but plugins do different things (gradle plugin only provides api and impl configurations) and could be used together.
+
 
 ### Setup
 
@@ -35,7 +40,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.4'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.5'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -45,11 +50,11 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '1.0.4'
+    id 'ru.vyarus.java-lib' version '1.0.5'
 }
 ```
 
-Plugin must be applied after java or groovy plugins. Otherwise it will do nothing.
+Plugin must be applied after java or groovy or java-library plugins. Otherwise it will do nothing.
 
 ### Usage
 
@@ -63,7 +68,7 @@ version = '1.0.0'                       // project version
 description = 'My project description'  // optional (affects jar manifest) 
 ```
 
-You may use optional and provided dependencies:
+You may use optional and provided dependencies ([if java-library plugin not used](https://github.com/xvik/gradle-pom-plugin#provided-and-optional-configurations)):
 
 ```groovy
 dependencies {    

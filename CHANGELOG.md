@@ -1,3 +1,4 @@
+### 1.0.5 (2017-08-15)
 * Update pom plugin (support gradle java-library plugin)
 
 ### 1.0.4 (2016-09-05)
@@ -11,7 +12,7 @@
 
 ### 1.0.1 (2015-12-05)
 * groovydocJar use javadoc classifier if no java sources available (because maven central requires javadoc for publication)
-* Generate pom.properties inside jar's MEAT-INF (like maven)
+* Generate pom.properties inside jar's META-INF (like maven)
 
 ### 1.0.0 (2015-11-23)
 * Initial release
