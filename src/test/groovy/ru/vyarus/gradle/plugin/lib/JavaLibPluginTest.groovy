@@ -54,4 +54,27 @@ class JavaLibPluginTest extends AbstractTest {
         then: "install task created"
         project.tasks.install
     }
+
+    def "Check plugin registration for java-library"() {
+
+        when: "activating plugin"
+        file('src/main/java').mkdirs()
+        Project project = project {
+            apply plugin: 'java-library'
+            apply plugin: "ru.vyarus.java-lib"
+        }
+
+        then: "java and pom plugins activated"
+        project.plugins.findPlugin(PomPlugin)
+
+        then: "mavenJava publication registered"
+        project.publishing.publications.maven
+
+        then: "javadoc and sources tasks created"
+        project.tasks.javadocJar
+        project.tasks.sourcesJar
+
+        then: "install task created"
+        project.tasks.install
+    }
 }
