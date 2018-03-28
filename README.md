@@ -1,6 +1,9 @@
 # Gradle Java-lib plugin
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://www.opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/travis/xvik/gradle-java-lib-plugin.svg)](https://travis-ci.org/xvik/gradle-java-lib-plugin)
+[![Appveyor build status](https://ci.appveyor.com/api/projects/status/github/xvik/gradle-java-lib-plugin?svg=true)](https://ci.appveyor.com/project/xvik/gradle-java-lib-plugin)
+[![codecov](https://codecov.io/gh/xvik/gradle-java-lib-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/xvik/gradle-java-lib-plugin)
+
 
 ### About
 
@@ -31,7 +34,7 @@ Releases are published to [bintray jcenter](https://bintray.com/vyarus/xvik/grad
 [maven central](https://maven-badges.herokuapp.com/maven-central/ru.vyarus/gradle-java-lib-plugin) and 
 [gradle plugins portal](https://plugins.gradle.org/plugin/ru.vyarus.java-lib).
 
-[![JCenter](https://img.shields.io/bintray/v/vyarus/xvik/gradle-java-lib-plugin.svg?label=jcenter)](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/_latestVersion)
+[![JCenter](https://api.bintray.com/packages/vyarus/xvik/gradle-java-lib-plugin/images/download.svg)](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/_latestVersion)
 [![Maven Central](https://img.shields.io/maven-central/v/ru.vyarus/gradle-java-lib-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/ru.vyarus/gradle-java-lib-plugin)
 
 ```groovy
@@ -335,6 +338,7 @@ task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
 * [quality-plugin](https://github.com/xvik/gradle-quality-plugin) - java and groovy source quality checks
 * [github-info-plugin](https://github.com/xvik/gradle-github-info-plugin) - pre-configure common plugins with github related info
 * [animalsniffer-plugin](https://github.com/xvik/gradle-animalsniffer-plugin) - java compatibility checks
+* [mkdocs-plugin](https://github.com/xvik/gradle-mkdocs-plugin) - project documentation generator 
 * [java-library generator](https://github.com/xvik/generator-lib-java) - java library project generator
 
 ---

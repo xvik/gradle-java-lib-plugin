@@ -65,7 +65,6 @@ class JavaLibPlugin implements Plugin<Project> {
             }
         }
         project.configure(project) {
-
             // delayed to be able to use version
             afterEvaluate {
                 // do not override user attributes
