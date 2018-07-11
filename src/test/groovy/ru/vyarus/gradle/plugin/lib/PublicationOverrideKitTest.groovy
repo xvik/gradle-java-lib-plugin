@@ -6,7 +6,7 @@ import org.gradle.testkit.runner.TaskOutcome
  * @author Vyacheslav Rusakov
  * @since 05.12.2015
  */
-class PublicationOverrideTest extends AbstractKitTest {
+class PublicationOverrideKitTest extends AbstractKitTest {
 
     def "Check publication override"() {
         setup:

@@ -3,10 +3,10 @@ package ru.vyarus.gradle.plugin.lib
 import org.gradle.testkit.runner.TaskOutcome
 
 /**
- * @author Vyacheslav Rusakov 
- * @since 10.11.2015
+ * @author Vyacheslav Rusakov
+ * @since 11.07.2018
  */
-class JavaLibPluginKitTest extends AbstractKitTest {
+class LegacyModeKitTest extends AbstractKitTest {
 
     def "Check install task"() {
         setup:
@@ -22,7 +22,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = run('install')
+        def result = runVer('4.6','install')
 
 
         String artifactId = projectName()
@@ -31,39 +31,6 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         then: "task done"
         result.task(":install").outcome == TaskOutcome.SUCCESS
         result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
-
-        then: "artifacts deployed"
-        deploy.exists()
-        def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
-                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
-    }
-
-    def "Check install task with stable publishing manually enabled"() {
-        setup:
-        file('src/main/java').mkdirs()
-        file('settings.gradle') << 'enableFeaturePreview(\'STABLE_PUBLISHING\')'
-        build """
-            plugins {
-                id 'java'
-                id 'ru.vyarus.java-lib'
-            }
-
-            group 'ru.vyarus'
-            version 1.0
-        """
-
-        when: "run pom task"
-        def result = run('install')
-
-
-        String artifactId = projectName()
-        File deploy = file("build/repo/ru/vyarus/$artifactId/1.0/")
-
-        then: "task done"
-        result.task(":install").outcome == TaskOutcome.SUCCESS
-        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
-        !result.output.contains("STABLE_PUBLISHING preview option enabled by")
 
         then: "artifacts deployed"
         deploy.exists()
@@ -86,7 +53,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = run('install')
+        def result = runVer('4.6', 'install')
 
 
         String artifactId = projectName()
@@ -119,7 +86,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = run('install')
+        def result = runVer('4.6','install')
 
 
         String artifactId = projectName()
@@ -149,7 +116,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = run('install')
+        def result = runVer('4.6', 'install')
 
 
         String artifactId = projectName()
@@ -181,7 +148,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = run('install')
+        def result = runVer('4.6', 'install')
 
 
         String artifactId = projectName()
@@ -196,5 +163,38 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         def baseName = artifactId + '-1.0'
         deploy.list() as Set ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
+    }
+
+    def "Check publication override"() {
+        setup:
+        file('src/main/java').mkdirs()
+        build """
+            plugins {
+                id 'java'
+                id 'ru.vyarus.java-lib'
+            }
+
+            group 'ru.vyarus'
+            version 1.0
+
+            publishing.publications.maven.artifacts = [jar, javadocJar]
+        """
+
+        when: "run pom task"
+        def result = runVer('4.6','install')
+
+
+        String artifactId = projectName()
+        File deploy = file("build/repo/ru/vyarus/$artifactId/1.0/")
+
+        then: "task done"
+        result.task(":install").outcome == TaskOutcome.SUCCESS
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+
+        then: "artifacts deployed, but without sources"
+        deploy.exists()
+        def baseName = artifactId + '-1.0'
+        deploy.list() as Set ==
+                ["${baseName}.jar", "${baseName}.pom", "${baseName}-javadoc.jar"] as Set<String>
     }
 }
