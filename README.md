@@ -38,7 +38,7 @@ but plugins do different things (gradle plugin only provides api and impl config
 * Tasks: `sourcesJar`, `javadocJar` (`groovydocJar`), `install`      
 * [Publication](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications): `maven`
 * Enable plugins: [maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html),
-[ru.vyarus.pompom](https://github.com/xvik/gradle-pom-plugin)
+[ru.vyarus.pom](https://github.com/xvik/gradle-pom-plugin)
 
 
 ### Setup
@@ -48,7 +48,7 @@ but plugins do different things (gradle plugin only provides api and impl config
 * Requires gradle 4.6 or above. For lower gradle use version [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5).
 * For gradle 4.8 and above plugin will enable [STABLE_PUBLISHING preview feature](https://docs.gradle.org/4.8/userguide/publishing_maven.html#publishing_maven:deferred_configuration) -
 disable lazy evaluation of publishing configuration (unification).
-This is required to overcome hard to track `Cannot configure the 'publishing' extension` errors.
+This is required to overcome hard to track `Cannot configure the 'publishing' extension` errors
 (appeared with some combinations of plugins).
 * In gradle 5 this preview option will be enabled by default. 
 
