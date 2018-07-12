@@ -102,7 +102,7 @@ test {
     }
     maxHeapSize = '512m'
     doLast {
-        sleep(200)
+        sleep(400)
     }
 }
 

@@ -164,7 +164,7 @@ class JavaLibPlugin implements Plugin<Project> {
         try {
             FeaturePreviews.Feature stablePublishingFeature = FeaturePreviews.Feature
                     .withName('STABLE_PUBLISHING')
-            return stablePublishingFeature.isActive() && !previews.isFeatureEnabled(stablePublishingFeature)
+            return stablePublishingFeature.isActive() && previews.isFeatureEnabled(stablePublishingFeature)
         } catch (IllegalArgumentException ignored) {
             // do nothing if option doesn't exists anymore (.withName() failed)
             return false

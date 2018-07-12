@@ -1,3 +1,5 @@
+* Fix stable publishing detection
+
 ### 1.1.0 (2018-07-13)
 * Gradle 4.8 [STABLE_PUBLISHING](https://docs.gradle.org/4.8/userguide/publishing_maven.html#publishing_maven:deferred_configuration) support
     - Plugin requires gradle 4.6 or above (will fail on earlier gradle).
