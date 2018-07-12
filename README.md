@@ -7,19 +7,23 @@
 
 ### About
 
-Plugin applies common configuration for java or groovy library: 
+Plugin configures publication ([maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html) 
+plugin) artifacts for java or groovy library to be like artifacts produced by maven 
+and compatible with maven central (central requires 3 artifacts with correct pom).
 
 * Configure `jar` with default manifest and put pom.xml and pom.properties inside jar (like maven do)
-* Add `sourcesJar` task
-* Add `javadocJar` or (and) `groovydocJar` tasks
+* Add `sourcesJar` add `javadocJar` (or (and) `groovydocJar`) tasks
 * Configures maven publication named `maven` with all jars (jar, sources javadock or (and) groovydoc)
-* Add `install` task as shortcut for publishToMavenLocal
 * Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) which:   
   - Fix [dependencies scopes](https://github.com/xvik/gradle-pom-plugin#java-and-groovy-plugins) 
   in generated pom
   - Add `pom` configuration closure to [simplify pom definition](https://github.com/xvik/gradle-pom-plugin#pom-configuration).
   - Add `withPomXml` configuration closure to use if you [need manual xml configuration](https://github.com/xvik/gradle-pom-plugin#manual-pom-modification) 
   - Adds `optional` and `provided` configurations (affect only resulted pom)
+* Add `install` task as shortcut for publishToMavenLocal  
+
+If your project is hosted on github you may look to [github-info plugin](https://github.com/xvik/gradle-github-info-plugin) 
+which fills some pom sections for you automatically. 
 
 If you need [multiple publications](https://docs.gradle.org/current/userguide/publishing_maven.html#N17EB8) from the same project, 
 then you will have to perform additional configuration or, maybe (depends on case), use only [pom plugin](https://github.com/xvik/gradle-pom-plugin). 
@@ -27,8 +31,26 @@ then you will have to perform additional configuration or, maybe (depends on cas
 **Confusion point**: plugin named almost the same as gradle's own [java-library plugin](https://docs.gradle.org/current/userguide/java_library_plugin.html),
 but plugins do different things (gradle plugin only provides api and impl configurations) and could be used together.
 
+##### Summary
+
+* Configuration closures: `pom`, `withPomXml`
+* Configurations: `optional`, `provided` ([if `java-library` not enabled](https://github.com/xvik/gradle-pom-plugin#java-library-plugin))
+* Tasks: `sourcesJar`, `javadocJar` (`groovydocJar`), `install`      
+* [Publication](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications): `maven`
+* Enable plugins: [maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html),
+[ru.vyarus.pompom](https://github.com/xvik/gradle-pom-plugin)
+
 
 ### Setup
+
+**IMPORTANT**: version 1.1.0 and above 
+
+* Requires gradle 4.6 or above. For lower gradle use version [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5).
+* For gradle 4.8 and above plugin will enable [STABLE_PUBLISHING preview feature](https://docs.gradle.org/4.8/userguide/publishing_maven.html#publishing_maven:deferred_configuration) -
+disable lazy evaluation of publishing configuration (unification).
+This is required to overcome hard to track `Cannot configure the 'publishing' extension` errors.
+(appeared with some combinations of plugins).
+* In gradle 5 this preview option will be enabled by default. 
 
 Releases are published to [bintray jcenter](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/), 
 [maven central](https://maven-badges.herokuapp.com/maven-central/ru.vyarus/gradle-java-lib-plugin) and 
@@ -43,7 +65,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:1.0.5'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:1.1.0'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -53,7 +75,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '1.0.5'
+    id 'ru.vyarus.java-lib' version '1.1.0'
 }
 ```
 
@@ -177,7 +199,7 @@ If you dont want to publish everything (jar, sources, javadoc) then you can over
 publishing.publications.maven.artifacts = [jar, javadocJar]
 ```
 
-Here sources are excluded from publishing.
+Here sources are excluded from publishing (note that if you going to publish to maven central sources are required).
 
 ##### Publish to repository 
  
