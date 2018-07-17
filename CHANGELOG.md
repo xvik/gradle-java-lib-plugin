@@ -1,3 +1,5 @@
+* Fix missed pom dependencies
+
 ### 1.1.1 (2018-07-13)
 * Fix stable publishing detection
 

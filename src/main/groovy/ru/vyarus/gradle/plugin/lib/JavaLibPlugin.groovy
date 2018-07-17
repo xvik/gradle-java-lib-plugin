@@ -197,11 +197,11 @@ class JavaLibPlugin implements Plugin<Project> {
             publishing {
                 publications {
                     maven(MavenPublication) {
+                        from components.java
                         // apply configuration only if it wasn't configured manually,
                         // for example like publishing.publications.maven.artifacts = [jar, javadocJar]
                         afterEvaluate {
-                            if (artifacts.empty) {
-                                artifact jar
+                            if (artifacts.size() == 1) {
                                 artifact sourcesJar
                                 if (project.tasks.findByName(JAVADOC_JAR)) {
                                     artifact javadocJar
