@@ -1,3 +1,4 @@
+### 1.1.2 (2018-07-22)
 * Fix missed pom dependencies
 * Unify stable/lazy behaviours
 
