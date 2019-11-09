@@ -3,7 +3,7 @@ dist: xenial
 
 matrix:
   include:
-    - jdk: oraclejdk8
+    - jdk: openjdk8
     - jdk: openjdk11
 
 before_install: chmod +x gradlew
