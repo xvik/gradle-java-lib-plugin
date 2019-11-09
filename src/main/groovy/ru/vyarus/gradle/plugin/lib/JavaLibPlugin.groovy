@@ -10,6 +10,10 @@ import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.compile.GroovyCompile
+import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.api.tasks.testing.Test
+import org.gradle.process.internal.JvmOptions
 import org.gradle.util.GradleVersion
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
@@ -65,6 +69,7 @@ class JavaLibPlugin implements Plugin<Project> {
                 configureStableMavenPublication(project)
             }
 
+            configureEncoding(project)
             configureJar(project)
             addSourcesJarTask(project)
             addJavadocJarTask(project)
@@ -76,12 +81,26 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
+    private void configureEncoding(Project project) {
+        project.tasks.withType(JavaCompile) {
+            options.encoding = 'UTF-8'
+        }
+
+        project.tasks.withType(GroovyCompile) {
+            options.encoding = 'UTF-8'
+        }
+
+        project.tasks.withType(Test) {
+            systemProperty JvmOptions.FILE_ENCODING_KEY, 'UTF-8'
+        }
+    }
+
     private void configureJar(Project project) {
         project.tasks.create('generatePomPropertiesFile') {
             inputs.properties([
-                    'version': "${ -> project.version }",
-                    'groupId': "${ -> project.group }",
-                    'artifactId': "${ -> project.name }",
+                    'version'   : "${-> project.version}",
+                    'groupId'   : "${-> project.group}",
+                    'artifactId': "${-> project.name}",
             ])
             outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
             doLast {

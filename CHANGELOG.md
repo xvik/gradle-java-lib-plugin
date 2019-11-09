@@ -1,3 +1,6 @@
+* Set UTF-8 encoding for JavaCompile and GroovyCompile tasks
+* Set file.encoding=UTF-8 system property for Test tasks 
+
 ### 1.1.2 (2018-07-22)
 * Fix missed pom dependencies
 * Unify stable/lazy behaviours
