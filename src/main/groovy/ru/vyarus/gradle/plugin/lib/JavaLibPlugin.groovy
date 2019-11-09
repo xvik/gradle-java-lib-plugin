@@ -98,9 +98,9 @@ class JavaLibPlugin implements Plugin<Project> {
     private void configureJar(Project project) {
         project.tasks.create('generatePomPropertiesFile') {
             inputs.properties([
-                    'version'   : "${-> project.version}",
-                    'groupId'   : "${-> project.group}",
-                    'artifactId': "${-> project.name}",
+                    'version': "${ -> project.version }",
+                    'groupId': "${ -> project.group }",
+                    'artifactId': "${ -> project.name }",
             ])
             outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
             doLast {
