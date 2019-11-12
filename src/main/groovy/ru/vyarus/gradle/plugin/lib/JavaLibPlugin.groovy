@@ -12,12 +12,14 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.GroovyCompile
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.process.internal.JvmOptions
 import org.gradle.util.GradleVersion
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
 import javax.inject.Inject
+import java.nio.charset.StandardCharsets
 
 /**
  * Plugin performs common configuration for java or groovy library:
@@ -83,15 +85,22 @@ class JavaLibPlugin implements Plugin<Project> {
 
     private void configureEncoding(Project project) {
         project.tasks.withType(JavaCompile) {
-            options.encoding = 'UTF-8'
+            options.encoding = StandardCharsets.UTF_8
         }
 
         project.tasks.withType(GroovyCompile) {
-            options.encoding = 'UTF-8'
+            options.encoding = StandardCharsets.UTF_8
         }
 
         project.tasks.withType(Test) {
-            systemProperty JvmOptions.FILE_ENCODING_KEY, 'UTF-8'
+            systemProperty JvmOptions.FILE_ENCODING_KEY, StandardCharsets.UTF_8
+        }
+
+        project.tasks.withType(Javadoc) {
+            options.encoding = StandardCharsets.UTF_8
+            // StandardJavadocDocletOptions
+            options.charSet = StandardCharsets.UTF_8
+            options.docEncoding = StandardCharsets.UTF_8
         }
     }
 

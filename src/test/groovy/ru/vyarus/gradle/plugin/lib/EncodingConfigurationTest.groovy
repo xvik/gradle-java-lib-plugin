@@ -21,6 +21,11 @@ class EncodingConfigurationTest extends AbstractTest {
         project.tasks.compileJava.options.encoding == 'UTF-8'
         project.tasks.compileTestJava.options.encoding == 'UTF-8'
 
+        then: "javadoc affected"
+        project.tasks.javadoc.options.encoding == 'UTF-8'
+        project.tasks.javadoc.options.charSet == 'UTF-8'
+        project.tasks.javadoc.options.docEncoding == 'UTF-8'
+
         then: "test sys property set"
         project.tasks.test.allJvmArgs.contains('-Dfile.encoding=UTF-8')
     }
@@ -40,6 +45,11 @@ class EncodingConfigurationTest extends AbstractTest {
         project.tasks.compileGroovy.options.encoding == 'UTF-8'
         project.tasks.compileTestJava.options.encoding == 'UTF-8'
         project.tasks.compileTestGroovy.options.encoding == 'UTF-8'
+
+        then: "javadoc affected"
+        project.tasks.javadoc.options.encoding == 'UTF-8'
+        project.tasks.javadoc.options.charSet == 'UTF-8'
+        project.tasks.javadoc.options.docEncoding == 'UTF-8'
 
         then: "test sys property set"
         project.tasks.test.allJvmArgs.contains('-Dfile.encoding=UTF-8')
