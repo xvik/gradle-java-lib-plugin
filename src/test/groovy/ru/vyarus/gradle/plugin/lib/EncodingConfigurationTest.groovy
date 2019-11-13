@@ -43,8 +43,10 @@ class EncodingConfigurationTest extends AbstractTest {
         then: "compile tasks affected"
         project.tasks.compileJava.options.encoding == 'UTF-8'
         project.tasks.compileGroovy.options.encoding == 'UTF-8'
+        project.tasks.compileGroovy.groovyOptions.encoding == 'UTF-8'
         project.tasks.compileTestJava.options.encoding == 'UTF-8'
         project.tasks.compileTestGroovy.options.encoding == 'UTF-8'
+        project.tasks.compileTestGroovy.groovyOptions.encoding == 'UTF-8'
 
         then: "javadoc affected"
         project.tasks.javadoc.options.encoding == 'UTF-8'
