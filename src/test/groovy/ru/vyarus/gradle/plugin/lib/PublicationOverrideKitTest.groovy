@@ -37,7 +37,7 @@ class PublicationOverrideKitTest extends AbstractKitTest {
         then: "artifacts deployed, but without sources"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-javadoc.jar"] as Set<String>
     }
 }

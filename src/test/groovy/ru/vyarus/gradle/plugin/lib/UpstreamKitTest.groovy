@@ -215,9 +215,4 @@ class UpstreamKitTest extends AbstractKitTest {
         props.contains("artifactId: ${projectName()}")
         props.contains('version: 1.0')
     }
-
-    private Set<String> withoutModuleFile(File deployDir) {
-        // gradle 6 publish additional module file (for extended dependencies model)
-        (deployDir.list() as Set<String>).findAll {!it.endsWith('.module')}
-    }
 }

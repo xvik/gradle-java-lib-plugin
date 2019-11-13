@@ -74,4 +74,9 @@ abstract class AbstractKitTest extends Specification {
     BuildResult runFailedVer(String gradleVersion, String... commands) {
         return gradle(commands).withGradleVersion(gradleVersion).buildAndFail()
     }
+
+    Set<String> withoutModuleFile(File deployDir) {
+        // gradle 6 publish additional module file (for extended dependencies model)
+        (deployDir.list() as Set<String>).findAll {!it.endsWith('.module')}
+    }
 }

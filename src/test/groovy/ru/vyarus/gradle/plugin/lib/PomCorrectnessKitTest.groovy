@@ -44,7 +44,7 @@ class PomCorrectnessKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
 
         when: "get pom"

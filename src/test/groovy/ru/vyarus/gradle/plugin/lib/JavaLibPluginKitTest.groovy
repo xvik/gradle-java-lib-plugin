@@ -35,7 +35,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
@@ -67,7 +67,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         deploy.exists()
         def baseName = artifactId + '-1.0'
         // javadoc will be produced instead of groovydoc! important for maven central
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
@@ -99,7 +99,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar", "${baseName}-groovydoc.jar"] as Set<String>
     }
 
@@ -129,7 +129,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
     }
 
@@ -161,7 +161,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
     }
 }

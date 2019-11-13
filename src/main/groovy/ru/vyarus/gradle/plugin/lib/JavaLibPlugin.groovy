@@ -4,18 +4,22 @@ import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.PublishArtifact
 import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.GroovyCompile
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
+import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin
 import org.gradle.process.internal.JvmOptions
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
@@ -32,7 +36,13 @@ import java.nio.charset.StandardCharsets
  *     'pom' closure fot simpler pom configuration
  *     <li> Add 'install' task as shortcut for publishToMavenLocal
  * </ul>
- * Plugin must be registered after java or groovy plugins, otherwise wil do nothing.
+ * <p>
+ * In case of gradle plugin (java-gradle-plugin + plugin-publish) use pluginMaven publication instead iof maven
+ * because "pluginMaven" name is hardcoded in java-gradle-publish plugin (publication creation could be disabled,
+ * but then alias publications, required by gradle portal, would not be created automatically). Plugin-publish
+ * also creates it's own javadoc and sources tasks, so manually registering artifacts (only) to prevent this.
+ * Overall in case of gradle plugin, 1 maven publication should be used and exactly the same artifacts should
+ * be published everywhere (only plugin portal also receive alias publications).
  *
  * @author Vyacheslav Rusakov
  * @since 07.11.2015
@@ -52,12 +62,12 @@ class JavaLibPlugin implements Plugin<Project> {
             project.plugins.apply(PomPlugin)
 
             // assume gradle 5.0 and above - stable publishing enabled
-            configureMavenPublication(project)
+            MavenPublication publication = configureMavenPublication(project)
             configureEncoding(project)
-            configureJar(project)
-            addSourcesJarTask(project)
-            addJavadocJarTask(project)
-            addGroovydocJarTask(project)
+            configureJar(project, publication)
+            addSourcesJarTask(project, publication)
+            addJavadocJarTask(project, publication)
+            addGroovydocJarTask(project, publication)
             addInstallTask(project)
         }
     }
@@ -85,7 +95,7 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
-    private void configureJar(Project project) {
+    private void configureJar(Project project, MavenPublication publication) {
         project.tasks.register('generatePomPropertiesFile') {
             it.with {
                 inputs.properties([
@@ -117,19 +127,19 @@ class JavaLibPlugin implements Plugin<Project> {
                 }
             }
 
-            model {
-                project.tasks.named('jar').configure {
+            project.tasks.named('processResources', Copy).configure {
+                it.with {
                     into("META-INF/maven/$project.group/$project.name") {
-                        from generatePomFileForMavenPublication
+                        from project.tasks.getByName("generatePomFileFor${publication.name.capitalize()}Publication")
                         rename '.*.xml', 'pom.xml'
-                        from generatePomPropertiesFile
+                        from project.tasks.getByName('generatePomPropertiesFile')
                     }
                 }
             }
         }
     }
 
-    private void addSourcesJarTask(Project project) {
+    private void addSourcesJarTask(Project project, MavenPublication publication) {
         TaskProvider<Jar> sourcesJar = project.tasks.register('sourcesJar', Jar) {
             it.with {
                 dependsOn project.tasks.named('classes')
@@ -138,11 +148,10 @@ class JavaLibPlugin implements Plugin<Project> {
                 archiveClassifier.set('sources')
             }
         }
-        // https://github.com/gradle/gradle/issues/6246
-        project.publishing.publications.maven.artifact new LazyPublishArtifact(sourcesJar)
+        registerArtifact(project, publication, sourcesJar)
     }
 
-    private void addJavadocJarTask(Project project) {
+    private void addJavadocJarTask(Project project, MavenPublication publication) {
         // apply only if java sources exist
         boolean hasJavaSources = project.sourceSets.main.java.srcDirs.find { it.exists() }
         if (hasJavaSources) {
@@ -155,12 +164,11 @@ class JavaLibPlugin implements Plugin<Project> {
                     from project.tasks.javadoc.destinationDir
                 }
             }
-            // https://github.com/gradle/gradle/issues/6246
-            project.publishing.publications.maven.artifact new LazyPublishArtifact(javadocJar)
+            registerArtifact(project, publication, javadocJar)
         }
     }
 
-    private void addGroovydocJarTask(Project project) {
+    private void addGroovydocJarTask(Project project, MavenPublication publication) {
         // apply only if groovy enabled
         project.plugins.withType(GroovyPlugin) {
             // apply only if groovy sources exist
@@ -176,19 +184,30 @@ class JavaLibPlugin implements Plugin<Project> {
                         from project.tasks.groovydoc.destinationDir
                     }
                 }
-                // https://github.com/gradle/gradle/issues/6246
-                project.publishing.publications.maven.artifact new LazyPublishArtifact(groovydocJar)
+                registerArtifact(project, publication, groovydocJar)
             }
         }
     }
 
     @SuppressWarnings('NestedBlockDepth')
-    private void configureMavenPublication(Project project) {
-        project.extensions.configure(PublishingExtension) {
-            MavenPublication publication = it.publications.maybeCreate('maven', MavenPublication)
+    private MavenPublication configureMavenPublication(Project project) {
+        // java-gradle-plugin tightly connected to its configuration name, so re-using it instead of default
+        // in order to not create additional publication
+        // NOTE: java-gradle-plugin will also create alias publications for each plugin, but we will simply don't
+        // use them during bintray publication
+        boolean gradlePlugin = project.plugins.hasPlugin(JavaGradlePluginPlugin)
+        String targetName = gradlePlugin ? 'pluginMaven' : 'maven'
+        // configure publication
+        MavenPublication publication = project.extensions
+                .findByType(PublishingExtension)
+                .publications
+                .maybeCreate(targetName, MavenPublication)
+        // in case of gradle plugin java-gradle-plugin will configure java component
+        if (!gradlePlugin) {
             publication.from(project.components.getByName('java'))
-            // in stable publication mode extra jars added directly after tasks registration
         }
+        // in stable publication mode extra jars added directly after tasks registration
+        return publication
     }
 
     private void addInstallTask(Project project) {
@@ -207,6 +226,24 @@ class JavaLibPlugin implements Plugin<Project> {
     private void putIfAbsent(Attributes attributes, String name, Object value) {
         if (!attributes.containsKey(name)) {
             attributes.put(name, value)
+        }
+    }
+
+    private void registerArtifact(Project project, MavenPublication publication, TaskProvider task) {
+        // https://github.com/gradle/gradle/issues/6246
+        PublishArtifact artifact = new LazyPublishArtifact(task)
+
+        // maven publication registration
+        publication.artifact artifact
+
+        // plugin-publish create its own sources and javadoc tasks, but only if
+        // archives configuration contains anything except main jar, so register custom tasks directly to avoid
+        // duplicate artifacts (see PublishPlugin implementation)
+        if (project.plugins.hasPlugin('com.gradle.plugin-publish')) {
+            Configuration archives = project.configurations.findByName('archives')
+            if (archives && !archives.artifacts.contains(artifact)) {
+                project.artifacts.add('archives', artifact)
+            }
         }
     }
 
