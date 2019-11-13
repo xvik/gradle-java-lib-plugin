@@ -10,6 +10,8 @@ import spock.lang.IgnoreIf
 @IgnoreIf({jvm.java9Compatible}) // gradle 4.6 will not work on java 11
 class LegacyModeKitTest extends AbstractKitTest {
 
+    String GRADLE_VERSION = '5.1'
+
     def "Check install task"() {
         setup:
         file('src/main/java').mkdirs()
@@ -24,7 +26,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = runVer('4.6','install')
+        def result = runVer(GRADLE_VERSION,'install')
 
 
         String artifactId = projectName()
@@ -55,7 +57,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = runVer('4.6', 'install')
+        def result = runVer(GRADLE_VERSION, 'install')
 
 
         String artifactId = projectName()
@@ -88,7 +90,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = runVer('4.6','install')
+        def result = runVer(GRADLE_VERSION,'install')
 
 
         String artifactId = projectName()
@@ -118,7 +120,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = runVer('4.6', 'install')
+        def result = runVer(GRADLE_VERSION, 'install')
 
 
         String artifactId = projectName()
@@ -150,7 +152,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = runVer('4.6', 'install')
+        def result = runVer(GRADLE_VERSION, 'install')
 
 
         String artifactId = projectName()
@@ -183,7 +185,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = runVer('4.6','install')
+        def result = runVer(GRADLE_VERSION,'install')
 
 
         String artifactId = projectName()

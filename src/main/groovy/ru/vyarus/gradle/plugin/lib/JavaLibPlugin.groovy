@@ -4,21 +4,20 @@ import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.internal.FeaturePreviews
+import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.GroovyCompile
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.process.internal.JvmOptions
-import org.gradle.util.GradleVersion
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
-import javax.inject.Inject
 import java.nio.charset.StandardCharsets
 
 /**
@@ -45,95 +44,80 @@ class JavaLibPlugin implements Plugin<Project> {
     private static final String JAVADOC_JAR = 'javadocJar'
     private static final String GROOVYDOC_JAR = 'groovydocJar'
 
-    private final FeaturePreviews previews
-    private boolean stablePublishing
-
-    // plugin will fail to initialize on gradle before 4.6
-    @Inject
-    JavaLibPlugin(FeaturePreviews featurePreviews) {
-        this.previews = featurePreviews
-    }
-
     @Override
     void apply(Project project) {
         // activated only when java plugin is enabled
         project.plugins.withType(JavaPlugin) {
             project.plugins.apply(PomPlugin)
-            /*
-             In stable mode (>= 4.8) publication is registered immediately with main jar and other jars are
-             added directly after tasks registration (workaround to allow easy overriding of artifacts in
-             user build file). In theory, legacy mode should work with stable publishing, but it doesn't work
-             under gradle plugins syntax (and works when plugin is applied in the old way).
-             In legacy mode (when publication is lazily registered) all jars are registered at once
-             */
-            stablePublishing = isStablePublishingEnabled()
-            if (stablePublishing) {
-                configureStableMavenPublication(project)
-            }
 
+            // assume gradle 5.0 and above - stable publishing enabled
+            configureMavenPublication(project)
             configureEncoding(project)
             configureJar(project)
             addSourcesJarTask(project)
             addJavadocJarTask(project)
             addGroovydocJarTask(project)
-            if (!stablePublishing) {
-                configureLazyMavenPublication(project)
-            }
             addInstallTask(project)
         }
     }
 
     private void configureEncoding(Project project) {
-        project.tasks.withType(JavaCompile) {
-            options.encoding = StandardCharsets.UTF_8
+        project.tasks.withType(JavaCompile).configureEach {
+            it.options.encoding = StandardCharsets.UTF_8
         }
 
-        project.tasks.withType(GroovyCompile) {
-            options.encoding = StandardCharsets.UTF_8
+        project.tasks.withType(GroovyCompile).configureEach {
+            it.options.encoding = StandardCharsets.UTF_8
         }
 
-        project.tasks.withType(Test) {
-            systemProperty JvmOptions.FILE_ENCODING_KEY, StandardCharsets.UTF_8
+        project.tasks.withType(Test).configureEach {
+            it.systemProperty JvmOptions.FILE_ENCODING_KEY, StandardCharsets.UTF_8
         }
 
-        project.tasks.withType(Javadoc) {
-            options.encoding = StandardCharsets.UTF_8
-            // StandardJavadocDocletOptions
-            options.charSet = StandardCharsets.UTF_8
-            options.docEncoding = StandardCharsets.UTF_8
+        project.tasks.withType(Javadoc).configureEach {
+            it.with {
+                options.encoding = StandardCharsets.UTF_8
+                // StandardJavadocDocletOptions
+                options.charSet = StandardCharsets.UTF_8
+                options.docEncoding = StandardCharsets.UTF_8
+            }
         }
     }
 
     private void configureJar(Project project) {
-        project.tasks.create('generatePomPropertiesFile') {
-            inputs.properties([
-                    'version': "${ -> project.version }",
-                    'groupId': "${ -> project.group }",
-                    'artifactId': "${ -> project.name }",
-            ])
-            outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
-            doLast {
-                File file = outputs.files.singleFile
-                file.parentFile.mkdirs()
-                file << inputs.properties.collect { key, value -> "$key: $value" }.join('\n')
+        project.tasks.register('generatePomPropertiesFile') {
+            it.with {
+                inputs.properties([
+                        'version': "${ -> project.version }",
+                        'groupId': "${ -> project.group }",
+                        'artifactId': "${ -> project.name }",
+                ])
+                outputs.file "$project.buildDir/generatePomPropertiesFile/pom.properties"
+                doLast {
+                    File file = outputs.files.singleFile
+                    file.parentFile.mkdirs()
+                    file << inputs.properties.collect { key, value -> "$key: $value" }.join('\n')
+                }
             }
         }
         project.configure(project) {
             // delayed to be able to use version
             afterEvaluate {
                 // do not override user attributes
-                Attributes attributes = jar.manifest.attributes
-                putIfAbsent(attributes, 'Implementation-Title', project.description ?: project.name)
-                putIfAbsent(attributes, 'Implementation-Version', project.version)
-                putIfAbsent(attributes, 'Built-By', System.getProperty('user.name'))
-                putIfAbsent(attributes, 'Built-Date', new Date())
-                putIfAbsent(attributes, 'Built-JDK', System.getProperty('java.version'))
-                putIfAbsent(attributes, 'Built-Gradle', project.gradle.gradleVersion)
-                putIfAbsent(attributes, 'Target-JDK', project.targetCompatibility)
+                tasks.named('jar').configure {
+                    Attributes attributes = it.manifest.attributes
+                    putIfAbsent(attributes, 'Implementation-Title', project.description ?: project.name)
+                    putIfAbsent(attributes, 'Implementation-Version', project.version)
+                    putIfAbsent(attributes, 'Built-By', System.getProperty('user.name'))
+                    putIfAbsent(attributes, 'Built-Date', new Date())
+                    putIfAbsent(attributes, 'Built-JDK', System.getProperty('java.version'))
+                    putIfAbsent(attributes, 'Built-Gradle', project.gradle.gradleVersion)
+                    putIfAbsent(attributes, 'Target-JDK', project.targetCompatibility)
+                }
             }
 
             model {
-                tasks.jar {
+                project.tasks.named('jar').configure {
                     into("META-INF/maven/$project.group/$project.name") {
                         from generatePomFileForMavenPublication
                         rename '.*.xml', 'pom.xml'
@@ -145,36 +129,33 @@ class JavaLibPlugin implements Plugin<Project> {
     }
 
     private void addSourcesJarTask(Project project) {
-        project.configure(project) {
-            tasks.create('sourcesJar', Jar)
-            sourcesJar {
-                dependsOn classes
-                group BUILD_GROUP
-                from sourceSets.main.allSource
-                classifier = 'sources'
-            }
-            if (stablePublishing) {
-                publishing.publications.maven.artifact sourcesJar
+        TaskProvider<Jar> sourcesJar = project.tasks.register('sourcesJar', Jar) {
+            it.with {
+                dependsOn project.tasks.named('classes')
+                group = BUILD_GROUP
+                from project.sourceSets.main.allSource
+                archiveClassifier.set('sources')
             }
         }
+        // https://github.com/gradle/gradle/issues/6246
+        project.publishing.publications.maven.artifact new LazyPublishArtifact(sourcesJar)
     }
 
     private void addJavadocJarTask(Project project) {
         // apply only if java sources exist
         boolean hasJavaSources = project.sourceSets.main.java.srcDirs.find { it.exists() }
         if (hasJavaSources) {
-            project.configure(project) {
-                tasks.create(JAVADOC_JAR, Jar)
-                javadocJar {
-                    dependsOn javadoc
-                    group BUILD_GROUP
-                    classifier 'javadoc'
-                    from javadoc.destinationDir
-                }
-                if (stablePublishing) {
-                    publishing.publications.maven.artifact javadocJar
+            TaskProvider<Jar> javadocJar = project.tasks.register(JAVADOC_JAR, Jar) {
+                it.with {
+                    dependsOn project.tasks.javadoc
+                    group = BUILD_GROUP
+                    archiveClassifier.set('javadoc')
+                    // configuration is delayed so it is ok to reference task instance here
+                    from project.tasks.javadoc.destinationDir
                 }
             }
+            // https://github.com/gradle/gradle/issues/6246
+            project.publishing.publications.maven.artifact new LazyPublishArtifact(javadocJar)
         }
     }
 
@@ -184,62 +165,24 @@ class JavaLibPlugin implements Plugin<Project> {
             // apply only if groovy sources exist
             boolean hasGroovySources = project.sourceSets.main.groovy.srcDirs.find { it.exists() }
             if (hasGroovySources) {
-                project.configure(project) {
-                    tasks.create(GROOVYDOC_JAR, Jar)
-                    groovydocJar {
-                        dependsOn groovydoc
-                        group BUILD_GROUP
+                TaskProvider<Jar> groovydocJar = project.tasks.register(GROOVYDOC_JAR, Jar) {
+                    it.with {
+                        dependsOn project.tasks.groovydoc
+                        group = BUILD_GROUP
                         // very important to have at least one javadoc package, because otherwise maven cantral
                         // would not accept package
-                        classifier project.tasks.findByName(JAVADOC_JAR) ? 'groovydoc' : 'javadoc'
-                        from groovydoc.destinationDir
-                    }
-                    if (stablePublishing) {
-                        publishing.publications.maven.artifact groovydocJar
+                        archiveClassifier.set(project.tasks.findByName(JAVADOC_JAR) ? 'groovydoc' : 'javadoc')
+                        from project.tasks.groovydoc.destinationDir
                     }
                 }
-            }
-        }
-    }
-
-    private boolean isStablePublishingEnabled() {
-        if (GradleVersion.current() >= GradleVersion.version('5.0')) {
-            // since 5.0 stable publishing should be enabled by default
-            return true
-        }
-        // option available from gradle 4.8
-        try {
-            FeaturePreviews.Feature stablePublishingFeature = FeaturePreviews.Feature
-                    .withName('STABLE_PUBLISHING')
-            return stablePublishingFeature.isActive() && previews.isFeatureEnabled(stablePublishingFeature)
-        } catch (IllegalArgumentException ignored) {
-            // do nothing if option doesn't exists anymore (.withName() failed)
-            return false
-        }
-    }
-
-    private void configureLazyMavenPublication(Project project) {
-        project.configure(project) {
-            // lazy initialized publication (could be directly overridden)
-            publishing {
-                publications {
-                    maven(MavenPublication) {
-                        from components.java
-                        artifact sourcesJar
-                        if (project.tasks.findByName(JAVADOC_JAR)) {
-                            artifact javadocJar
-                        }
-                        if (project.tasks.findByName(GROOVYDOC_JAR)) {
-                            artifact groovydocJar
-                        }
-                    }
-                }
+                // https://github.com/gradle/gradle/issues/6246
+                project.publishing.publications.maven.artifact new LazyPublishArtifact(groovydocJar)
             }
         }
     }
 
     @SuppressWarnings('NestedBlockDepth')
-    private void configureStableMavenPublication(Project project) {
+    private void configureMavenPublication(Project project) {
         project.configure(project) {
             publishing {
                 publications {
@@ -253,12 +196,14 @@ class JavaLibPlugin implements Plugin<Project> {
     }
 
     private void addInstallTask(Project project) {
-        project.tasks.create('install') {
-            dependsOn 'publishToMavenLocal'
-            group 'publishing'
-            description 'Alias for publishToMavenLocal task'
-            doLast {
-                logger.warn "INSTALLED $project.group:$project.name:$project.version"
+        project.tasks.register('install') {
+            it.with {
+                dependsOn 'publishToMavenLocal'
+                group = 'publishing'
+                description = 'Alias for publishToMavenLocal task'
+                doLast {
+                    logger.warn "INSTALLED $project.group:$project.name:$project.version"
+                }
             }
         }
     }
@@ -268,4 +213,5 @@ class JavaLibPlugin implements Plugin<Project> {
             attributes.put(name, value)
         }
     }
+
 }

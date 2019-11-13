@@ -1,3 +1,7 @@
+* (breaking) Requires gradle 5.1 and above
+    - Remove legacy (lazy, without strict publishing) publication configuration 
+* (breaking) Drop java 7 support
+* Use gradle configuration avoidance to prevent not used tasks creation
 * Set UTF-8 encoding for JavaCompile and GroovyCompile tasks
 * Set file.encoding=UTF-8 system property for Test tasks
 * Set UTF-8 encoding for javadoc task (encoding, charSet, docencoding) 
