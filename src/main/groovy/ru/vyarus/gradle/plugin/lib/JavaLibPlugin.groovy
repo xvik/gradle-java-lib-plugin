@@ -8,6 +8,7 @@ import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
@@ -183,15 +184,10 @@ class JavaLibPlugin implements Plugin<Project> {
 
     @SuppressWarnings('NestedBlockDepth')
     private void configureMavenPublication(Project project) {
-        project.configure(project) {
-            publishing {
-                publications {
-                    maven(MavenPublication) {
-                        from components.java
-                        // in stable publication mode extra jars are added directly after tasks registration
-                    }
-                }
-            }
+        project.extensions.configure(PublishingExtension) {
+            MavenPublication publication = it.publications.maybeCreate('maven', MavenPublication)
+            publication.from(project.components.getByName('java'))
+            // in stable publication mode extra jars added directly after tasks registration
         }
     }
 
