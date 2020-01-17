@@ -221,7 +221,7 @@ pom {
 
 Read more about pom specifics in [pom plugin description](https://github.com/xvik/gradle-pom-plugin).
 
-Use the following configuration to gent correct scope in the resulted pom:
+Use the following configuration to get correct scope in the resulted pom:
 
 Maven scope | Gradle configuration
 ------------| ----------------
@@ -250,7 +250,7 @@ You can override it:
 jar {
     manifest {
         attributes 'Implementation-Title': 'My Custom value',
-            'Built-By': 'Me',
+            'Built-By': 'Me'
     }
 }
 ```
@@ -335,8 +335,8 @@ For gradle plugin use `pluginMaven` publication name.
 
 ```groovy
 plugins {
-    id 'java'  // or java-library
-    id 'ru.vyarus.java-lib' version '1.0.4'
+    id 'java'  // or groovy or java-library
+    id 'ru.vyarus.java-lib' version '2.0.0'
     id 'com.jfrog.bintray' version '1.7.1'
 }
 
