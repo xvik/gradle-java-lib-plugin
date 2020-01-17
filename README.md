@@ -53,12 +53,9 @@ but plugins do *different things* (gradle plugin only provides `api` and `implem
 
 ### Setup
 
-Releases are published to [bintray jcenter](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/), 
-[maven central](https://maven-badges.herokuapp.com/maven-central/ru.vyarus/gradle-java-lib-plugin) and 
-[gradle plugins portal](https://plugins.gradle.org/plugin/ru.vyarus.java-lib).
-
-[![JCenter](https://api.bintray.com/packages/vyarus/xvik/gradle-java-lib-plugin/images/download.svg)](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/_latestVersion)
+[![JCenter](https://img.shields.io/bintray/v/vyarus/xvik/gradle-java-lib-plugin.svg?label=jcenter)](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/_latestVersion)
 [![Maven Central](https://img.shields.io/maven-central/v/ru.vyarus/gradle-java-lib-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/ru.vyarus/gradle-java-lib-plugin)
+[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/ru/vyarus/java-lib/ru.vyarus.java-lib.gradle.plugin/maven-metadata.xml.svg?colorB=007ec6&label=plugins%20portal)](https://plugins.gradle.org/plugin/ru.vyarus.java-lib)
 
 ```groovy
 buildscript {
@@ -228,7 +225,9 @@ Maven scope | Gradle configuration
 compile     | implementation, api
 runtime     | runtimeOnly
 provided    | compileOnly
-optional    | [gradle feature](#optional-dependencies)
+optional    | [gradle feature](https://github.com/xvik/gradle-pom-plugin#optional-dependencies)
+
+See [pom plugin doc](https://github.com/xvik/gradle-pom-plugin#dependencies) for more details about dependencies scopes in the generated pom
 
 #### Main Jar
 

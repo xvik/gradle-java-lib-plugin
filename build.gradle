@@ -21,9 +21,9 @@ wrapper {
 
 repositories { jcenter(); mavenLocal(); gradlePluginPortal(); maven { url 'https://jitpack.io' } }
 dependencies {
-    implementation 'com.github.xvik:gradle-pom-plugin:master-SNAPSHOT'
+    implementation 'ru.vyarus:gradle-pom-plugin:2.0.0'
 
-    testImplementation('org.spockframework:spock-core:1.2-groovy-2.5') {
+    testImplementation('org.spockframework:spock-core:1.3-groovy-2.5') {
         exclude group: 'org.codehaus.groovy'
     }
     testImplementation 'com.gradle.publish:plugin-publish-plugin:0.10.1'

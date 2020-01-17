@@ -1,6 +1,9 @@
+### 2.0.0 (2020-01-17)
 * (breaking) Requires gradle 5.1 and above
     - Remove legacy (lazy, without strict publishing) publication configuration 
 * (breaking) Drop java 7 support
+* (breaking) Updated pom plugin ([2.0.0](https://github.com/xvik/gradle-pom-plugin/releases/tag/2.0.0)) removes provided and optional scopes
+    - provided scope replaced with standard compileOnly configuration support 
 * Use gradle configuration avoidance to prevent not used tasks creation
 * Set UTF-8 encoding for JavaCompile and GroovyCompile tasks
 * Set file.encoding=UTF-8 system property for Test tasks
