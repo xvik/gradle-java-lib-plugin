@@ -32,8 +32,8 @@ import java.nio.charset.StandardCharsets
  *     <li> Add sourcesJar task
  *     <li> Add javadocJar or (and) groovydocJar tasks
  *     <li> Configures maven publication named 'maven' with all jars (jar, sources, javadock and maybe groovydoc)
- *     <li> Applies 'ru.vyarus.pom' plugin which fixes pom dependencies, adds provided and optional support and
- *     'pom' closure fot simpler pom configuration
+ *     <li> Applies 'ru.vyarus.pom' plugin which fixes pom dependencies, adds 'pom' closure fot simpler pom
+ *     configuration
  *     <li> Add 'install' task as shortcut for publishToMavenLocal
  * </ul>
  * <p>
