@@ -11,6 +11,8 @@ Plugin mainly removes boilerplate for common java or groovy library configuratio
 Configures publication ([maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html) 
 ) with all artifacts, required for maven central publishing (central requires 3 artifacts with correct pom).
 
+Features:
+
 * Maven-like `jar` configuration
     - put `pom.xml` and `pom.properties` inside jar
     - fill manifest properties 
@@ -25,8 +27,8 @@ Configures publication ([maven-publish](https://docs.gradle.org/current/userguid
     in generated pom
     - Add `pom` configuration closure to [simplify pom definition](https://github.com/xvik/gradle-pom-plugin#pom-configuration).
     - Add `withPomXml` configuration closure to use if you [need manual xml configuration](https://github.com/xvik/gradle-pom-plugin#manual-pom-modification) 
-* Add `install` task as shortcut for publishToMavenLocal
-* Apply UTF-8 encoding for:
+* Add `install` task as shortcut for `publishToMavenLocal`
+* Apply `UTF-8` encoding for:
     - compile tasks: `JavaCompile` and `GroovyCompile`
     - javadoc (encoding, charSet, docencoding) 
     - test tasls: set `file.encoding=UTF-8` system property (only for test tasks)  
@@ -170,7 +172,7 @@ UTF-8 applied to:
 
 Note that groovydoc task does not have encoding configuration, but it should use UTF-8 by defautl. 
 
-For tests, encoding is important (especially on linux) because test forked process will not inherit root gradle encoding configuration. 
+For tests, encoding is important (especially on windows) because test forked process will not inherit root gradle encoding configuration. 
 
 #### Tasks 
 
