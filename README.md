@@ -7,20 +7,29 @@
 
 ### About
 
-Plugin configures publication ([maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html) 
-plugin) artifacts for java or groovy library to be like artifacts produced by maven 
-and compatible with maven central (central requires 3 artifacts with correct pom).
+Plugin mainly removes boilerplate for common java or groovy library configuration (and gradle plugin).
+Configures publication ([maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html) 
+) with all artifacts, required for maven central publishing (central requires 3 artifacts with correct pom).
 
-* Configure `jar` with default manifest and put pom.xml and pom.properties inside jar (like maven do)
-* Add `sourcesJar` add `javadocJar` (or (and) `groovydocJar`) tasks
-* Configures maven publication named `maven` with all jars (jar, sources javadock or (and) groovydoc)
+* Maven-like `jar` configuration
+    - put `pom.xml` and `pom.properties` inside jar
+    - fill manifest properties 
+* Configure tasks for additional artifacts (required for maven central publish): 
+    - `sourcesJar`  
+    - `javadocJar` or (and) `groovydocJar`
+* Prepare maven publication (`maven-publish`)
+    - `maven` publication configured with all jars (jar, sources javadock or (and) groovydoc)
+    - for gradle plugin projects, configure existing `pluginMaven` publication
 * Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) which:   
-  - Fix [dependencies scopes](https://github.com/xvik/gradle-pom-plugin#java-and-groovy-plugins) 
-  in generated pom
-  - Add `pom` configuration closure to [simplify pom definition](https://github.com/xvik/gradle-pom-plugin#pom-configuration).
-  - Add `withPomXml` configuration closure to use if you [need manual xml configuration](https://github.com/xvik/gradle-pom-plugin#manual-pom-modification) 
-  - Adds `optional` and `provided` configurations (affect only resulted pom)
-* Add `install` task as shortcut for publishToMavenLocal  
+    - Fix [dependencies scopes](https://github.com/xvik/gradle-pom-plugin/#dependencies) 
+    in generated pom
+    - Add `pom` configuration closure to [simplify pom definition](https://github.com/xvik/gradle-pom-plugin#pom-configuration).
+    - Add `withPomXml` configuration closure to use if you [need manual xml configuration](https://github.com/xvik/gradle-pom-plugin#manual-pom-modification) 
+* Add `install` task as shortcut for publishToMavenLocal
+* Apply UTF-8 encoding for:
+    - compile tasks: `JavaCompile` and `GroovyCompile`
+    - javadoc (encoding, charSet, docencoding) 
+    - test tasls: set `file.encoding=UTF-8` system property (only for test tasks)  
 
 If your project is hosted on github you may look to [github-info plugin](https://github.com/xvik/gradle-github-info-plugin) 
 which fills some pom sections for you automatically. 
@@ -28,29 +37,19 @@ which fills some pom sections for you automatically.
 If you need [multiple publications](https://docs.gradle.org/current/userguide/publishing_maven.html#N17EB8) from the same project, 
 then you will have to perform additional configuration or, maybe (depends on case), use only [pom plugin](https://github.com/xvik/gradle-pom-plugin). 
 
-**Confusion point**: plugin named almost the same as gradle's own [java-library plugin](https://docs.gradle.org/current/userguide/java_library_plugin.html),
-but plugins do different things (gradle plugin only provides api and impl configurations) and could be used together.
+**Confusion point**: plugin named almost the same as gradle's own [java-library](https://docs.gradle.org/current/userguide/java_library_plugin.html) plugin,
+but plugins do *different things* (gradle plugin only provides `api` and `implementation` configurations) and plugins *could* be used together.
 
 ##### Summary
 
 * Configuration closures: `pom`, `withPomXml`
-* Configurations: `optional`, `provided` ([if `java-library` not enabled](https://github.com/xvik/gradle-pom-plugin#java-library-plugin))
 * Tasks: `sourcesJar`, `javadocJar` (`groovydocJar`), `install`      
-* [Publication](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications): `maven`
+* [Publication](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications): `maven` or `pluginMaven`
 * Enable plugins: [maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html),
 [ru.vyarus.pom](https://github.com/xvik/gradle-pom-plugin)
 
 
 ### Setup
-
-**IMPORTANT**: version 1.1.0 and above 
-
-* Requires gradle 4.6 or above. For lower gradle use version [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5).
-* For gradle 4.8 and above plugin will enable [STABLE_PUBLISHING preview feature](https://docs.gradle.org/4.8/userguide/publishing_maven.html#publishing_maven:deferred_configuration) -
-disable lazy evaluation of publishing configuration (unification).
-This is required to overcome hard to track `Cannot configure the 'publishing' extension` errors
-(appeared with some combinations of plugins).
-* In gradle 5 this preview option will be enabled by default. 
 
 Releases are published to [bintray jcenter](https://bintray.com/vyarus/xvik/gradle-java-lib-plugin/), 
 [maven central](https://maven-badges.herokuapp.com/maven-central/ru.vyarus/gradle-java-lib-plugin) and 
@@ -65,7 +64,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:1.1.2'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:2.0.0'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -75,11 +74,71 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '1.1.2'
+    id 'ru.vyarus.java-lib' version '2.0.0'
 }
 ```
 
-Plugin must be applied after java or groovy or java-library plugins. Otherwise it will do nothing.
+#### Compatibility
+
+Plugin compiled for java 8, compatible with java 11
+
+Gradle | Version
+--------|-------
+5.1     | 2.0.0
+4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
+older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
+
+#### Snapshots
+
+<details>
+      <summary>Snapshots may be used through JitPack</summary>
+
+* Go to [JitPack project page](https://jitpack.io/#xvik/gradle-java-lib-plugin)
+* Select `Commits` section and click `Get it` on commit you want to use (you may need to wait while version builds if no one requested it before)
+    or use `master-SNAPSHOT` to use the most recent snapshot
+
+For gradle before 6.0 use `buildscript` block with required commit hash as version:
+
+```groovy
+buildscript {
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+    dependencies {
+        classpath 'com.github.xvik:gradle-java-lib-plugin:b5a8aee24f'
+    }
+}
+apply plugin: 'ru.vyarus.java-lib'
+```
+
+For gradle 6.0 and above:
+
+* Add to `settings.gradle` (top most!) with required commit hash as version:
+
+  ```groovy
+  pluginManagement {
+      resolutionStrategy {
+          eachPlugin {
+              if (requested.id.namespace == 'ru.vyarus.java-lib') {
+                  useModule('com.github.xvik:gradle-java-lib-plugin:b5a8aee24f')
+              }
+          }
+      }
+      repositories {
+          maven { url 'https://jitpack.io' }
+          gradlePluginPortal()          
+      }
+  }    
+  ``` 
+* Use plugin without declaring version: 
+
+  ```groovy
+  plugins {
+      id 'ru.vyarus.java-lib'
+  }
+  ```  
+
+</details>  
 
 ### Usage
 
@@ -93,14 +152,25 @@ version = '1.0.0'                       // project version
 description = 'My project description'  // optional (affects jar manifest) 
 ```
 
-You may use optional and provided dependencies ([if java-library plugin not used](https://github.com/xvik/gradle-pom-plugin#provided-and-optional-configurations)):
+Note: maven `artifactId` will be the same as project name and the default for project name
+is current directory name. If you need to change name, add in `settings.gradle`:
 
-```groovy
-dependencies {    
-    provided 'com.foo:dep-provided:1.0'
-    optional 'com.foo:dep-optional:1.0'        
-}
 ```
+rootProject.name = 'the-name-you-want'
+```        
+
+#### Encodings
+
+UTF-8 applied to:
+
+* (all `CompileJava` tasks).options.encoding 
+* (all `CompileGrovy` tasks).options.encoding
+* (all `Javadoc`).options.\[encoding, charSet, docEncoding]
+* (all `Test`).systemProperty 'file.encoding'
+
+Note that groovydoc task does not have encoding configuration, but it should use UTF-8 by defautl. 
+
+For tests, encoding is important (especially on linux) because test forked process will not inherit root gradle encoding configuration. 
 
 #### Tasks 
 
@@ -111,7 +181,11 @@ dependencies {
 IMPORTANT: if you have only groovy sources then `groovydocJar` will have javadoc` classifier! This is because maven central requires
 javadoc jar, so even if you write groovy project you have to name it javadoc.
 
-In case of both groovy and java sources, `groovydocJar` will use `groovydoc` classifier, because `javadocJar` already use `javadoc` and have to produce separate artifacts. 
+In case of both groovy and java sources, `groovydocJar` will use `groovydoc` classifier, because `javadocJar` already use `javadoc` and have to produce separate artifacts.   
+
+`install` task added to simplify publication to local maven repository: this is simply shortcut for
+gradle's [publishToMavenLocal](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks) task
+(simply shorter to type and more common name after maven).  
 
 #### Pom
 
@@ -145,6 +219,15 @@ pom {
 
 Read more about pom specifics in [pom plugin description](https://github.com/xvik/gradle-pom-plugin).
 
+Use the following configuration to gent correct scope in the resulted pom:
+
+Maven scope | Gradle configuration
+------------| ----------------
+compile     | implementation, api
+runtime     | runtimeOnly
+provided    | compileOnly
+optional    | [gradle feature](#optional-dependencies)
+
 #### Main Jar
 
 Plugin applies default manifest properties:
@@ -173,10 +256,12 @@ jar {
 For all not specified properties default values will be used.
 
 Plugin will include additional files inside jar (like maven do) into `META-INF/maven/group/artifact/`
+
 * pom.xml
 * pom.properties
 
 pom.properties contains:
+
 * version
 * groupId
 * artifactId
@@ -185,21 +270,33 @@ pom.properties contains:
 
 [maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html) plugin is used for publication.
 
-By default plugin configures `maven` publication with javadoc or (and) groovydoc and sources jars. 
+By default, plugin configures `maven` publication with javadoc or (and) groovydoc and sources jars. 
 
-Use 'install' task to deploy jars into local maven repository.
+Use `install` task to deploy jars into local maven repository.
 
 ```bash
 $ gradlew install
 ``` 
 
-If you dont want to publish everything (jar, sources, javadoc) then you can override list of publishing artifacts:
+If you don't want to publish everything (jar, sources, javadoc) then you can override list of publishing artifacts:
 
 ```groovy
 publishing.publications.maven.artifacts = [jar, javadocJar]
 ```
 
 Here sources are excluded from publishing (note that if you going to publish to maven central sources are required).
+
+##### Gradle plugin
+
+Gradle plugin project will have `java-gradle-plugin`, which declares it's own maven publication `pluginMaven`.
+It is not possible to re-configure it (name hardcoded) so java-lib plugin will not create `maven` publication and
+will configure existing `pluginMaven` instead.
+
+This way, only one publication would be prepared for gradle plugin. The same publication will be used by
+`plugin-publish` plugin (to publish into plugins portal) and by `maven-publish` (if you will need to also publish to other repositories)  
+
+Note that, by default `java-gradle-plugin` creates it's own sources and javadoc tasks, but `java-lib` plugin will
+disable this default behavior, so only `souresJar` and `javadocJar` (`groovydocJar`) tasks created by plugin would be used.
 
 ##### Publish to repository 
  
@@ -230,11 +327,13 @@ bintray {
 }    
 ```
 
+For gradle plugin use `pluginMaven` publication name.
+
 ### Complete usage example
 
 ```groovy
 plugins {
-    id 'java'
+    id 'java'  // or java-library
     id 'ru.vyarus.java-lib' version '1.0.4'
     id 'com.jfrog.bintray' version '1.7.1'
 }
@@ -243,12 +342,12 @@ group = 'com.sample'
 version = '1.0.0'
 description = 'Sample project'
 
-sourceCompatibility = 1.6
+sourceCompatibility = 1.8
 
 repositories { jcenter() }
 dependencies {    
-    provided 'com.foo:dep-provided:1.0'
-    compile 'com.foo:dep-compile:1.0'        
+    compileOnly 'com.foo:dep-provided:1.0'
+    implementation 'com.foo:dep-compile:1.0'        
 }
 
 pom {
@@ -336,7 +435,22 @@ task javadocJar(type: Jar, dependsOn: javadoc, group: 'build') {
 
 task groovydocJar(type: Jar, dependsOn: groovydoc, group: 'build') {
 	classifier 'groovydoc'
-    from groovydoc.destinationDir
+    from groovydoc.destinationDir 
+    options.encoding = StandardCharsets.UTF_8
+    options.charSet = StandardCharsets.UTF_8
+    options.docEncoding = StandardCharsets.UTF_8
+}    
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = StandardCharsets.UTF_8
+}
+
+tasks.withType(GroovyCompile).configureEach {
+    it.options.encoding = StandardCharsets.UTF_8
+}
+
+tasks.withType(Test).configureEach {
+   it.systemProperty JvmOptions.FILE_ENCODING_KEY, StandardCharsets.UTF_8
 }
 
 publishing {

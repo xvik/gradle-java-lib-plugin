@@ -9,7 +9,6 @@
     - When used with java-gardle-plugin, re-use pluginMaven publication instead of creating
         new one (because java-gardle-plugin hardcode publication name and it has to init it because of alias publications )
     - Plugin-publish will not create his own javadoc and sources tasks (so java-lib tasks will be used)
-    - Overall, single maven publication used and only one source and javadoc (groovydoc) tasks.
 
 ### 1.1.2 (2018-07-22)
 * Fix missed pom dependencies
