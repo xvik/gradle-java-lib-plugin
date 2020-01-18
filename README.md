@@ -21,7 +21,6 @@ Features:
     - `javadocJar` or (and) `groovydocJar`
 * Prepare maven publication (`maven-publish`)
     - `maven` publication configured with all jars (jar, sources javadock or (and) groovydoc)
-    - for gradle plugin projects, configure existing `pluginMaven` publication
 * Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) which:   
     - Fix [dependencies scopes](https://github.com/xvik/gradle-pom-plugin/#dependencies) 
     in generated pom
@@ -43,7 +42,7 @@ but plugins do *different things* (gradle plugin only provides `api` and `implem
 
 * Configuration closures: `pom`, `withPomXml`
 * Tasks: `sourcesJar`, `javadocJar` (`groovydocJar`), `install`      
-* [Publication](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications): `maven` or `pluginMaven`
+* [Publication](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications): `maven`
 * Enable plugins: [maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html),
 [ru.vyarus.pom](https://github.com/xvik/gradle-pom-plugin)
 
@@ -60,7 +59,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:2.0.0'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:2.0.1'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -70,7 +69,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '2.0.0'
+    id 'ru.vyarus.java-lib' version '2.0.1'
 }
 ```
 
@@ -80,7 +79,7 @@ Plugin compiled for java 8, compatible with java 11
 
 Gradle | Version
 --------|-------
-5.1     | 2.0.0
+5.1     | 2.0.1
 4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
 older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
 
@@ -229,15 +228,12 @@ Here sources are excluded from publishing (note that if you going to publish to 
 
 ##### Gradle plugin
 
-Gradle plugin project will have `java-gradle-plugin`, which declares it's own maven publication `pluginMaven`.
-It is not possible to re-configure it (name hardcoded) so java-lib plugin will not create `maven` publication and
-will configure existing `pluginMaven` instead.
+Gradle plugin project will have `java-gradle-plugin`, which declares its own maven publication `pluginMaven`.
+Java-lib will still create separate publication `maven`, but both publications would use the same artifacts and same pom
+modifications will apply for both (but its not important for gradle plugins portal).
 
-This way, only one publication would be prepared for gradle plugin. The same publication will be used by
-`plugin-publish` plugin (to publish into plugins portal) and by `maven-publish` (if you will need to also publish to other repositories)  
-
-Note that, by default `java-gradle-plugin` creates it's own sources and javadoc tasks, but `java-lib` plugin will
-disable this default behavior, so only `souresJar` and `javadocJar` (`groovydocJar`) tasks created by plugin would be used.
+Normally, `plugin-publish` plugin creates its own javadoc and sources tasks, but plugin will
+prevent it by configuring `javadocJar` and `sourcesJar` tasks instead.
 
 ##### Publish to repository 
  
@@ -267,8 +263,6 @@ bintray {
     ...
 }    
 ```
-
-For gradle plugin use `pluginMaven` publication name.
 
 #### Encodings
 

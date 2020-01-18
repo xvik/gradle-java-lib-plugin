@@ -1,3 +1,4 @@
+### 2.0.1 (2020-01-19)
 * Updated pom plugin (2.0.1) containing fix for provided dependencies declared with BOM
 * Revert to old behaviour: in case of gradle plugin project use "maven" publication because its not possible 
     to differentiate gralde plugin from usual project. In any case, artifacts will be exactly the same everywhere
