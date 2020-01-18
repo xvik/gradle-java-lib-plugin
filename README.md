@@ -7,9 +7,9 @@
 
 ### About
 
-Plugin mainly removes boilerplate for common java or groovy library configuration (and gradle plugin).
-Configures publication ([maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html) 
-) with all artifacts, required for maven central publishing (central requires 3 artifacts with correct pom).
+Plugin do all boilerplate of maven publication configuration (using [maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html)) 
+for java or groovy library or gradle plugin. Simplifies POM configuration and dependencies management. 
+Configured publication is ready for maven central (follows all central rules).
 
 Features:
 
@@ -31,10 +31,7 @@ Features:
 * Apply `UTF-8` encoding for:
     - compile tasks: `JavaCompile` and `GroovyCompile`
     - javadoc (encoding, charSet, docencoding) 
-    - test tasls: set `file.encoding=UTF-8` system property (only for test tasks)  
-
-If your project is hosted on github you may look to [github-info plugin](https://github.com/xvik/gradle-github-info-plugin) 
-which fills some pom sections for you automatically. 
+    - test tasls: set `file.encoding=UTF-8` system property (only for test tasks)   
 
 If you need [multiple publications](https://docs.gradle.org/current/userguide/publishing_maven.html#N17EB8) from the same project, 
 then you will have to perform additional configuration or, maybe (depends on case), use only [pom plugin](https://github.com/xvik/gradle-pom-plugin). 
@@ -92,8 +89,8 @@ older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
 <details>
       <summary>Snapshots may be used through JitPack</summary>
 
-* Go to [JitPack project page](https://jitpack.io/#xvik/gradle-java-lib-plugin)
-* Select `Commits` section and click `Get it` on commit you want to use (you may need to wait while version builds if no one requested it before)
+* Go to [JitPack project page](https://jitpack.io/#ru.vyarus/gradle-java-lib-plugin)
+* Select `Commits` section and click `Get it` on commit you want to use 
     or use `master-SNAPSHOT` to use the most recent snapshot
 
 For gradle before 6.0 use `buildscript` block with required commit hash as version:
@@ -104,7 +101,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.github.xvik:gradle-java-lib-plugin:b5a8aee24f'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:b5a8aee24f'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -119,7 +116,7 @@ For gradle 6.0 and above:
       resolutionStrategy {
           eachPlugin {
               if (requested.id.namespace == 'ru.vyarus.java-lib') {
-                  useModule('com.github.xvik:gradle-java-lib-plugin:b5a8aee24f')
+                  useModule('ru.vyarus:gradle-java-lib-plugin:b5a8aee24f')
               }
           }
       }
@@ -158,37 +155,9 @@ is current directory name. If you need to change name, add in `settings.gradle`:
 rootProject.name = 'the-name-you-want'
 ```        
 
-#### Encodings
-
-UTF-8 applied to:
-
-* (all `CompileJava` tasks).options.encoding 
-* (all `CompileGrovy` tasks).options.encoding
-* (all `Javadoc`).options.\[encoding, charSet, docEncoding]
-* (all `Test`).systemProperty 'file.encoding'
-
-Note that groovydoc task does not have encoding configuration, but it should use UTF-8 by defautl. 
-
-For tests, encoding is important (especially on windows) because test forked process will not inherit root gradle encoding configuration. 
-
-#### Tasks 
-
-- `sourcesJar` task is always applied 
-- `javadocJar` if java sources directory present ('src/main/java')
-- `groovydocJar` if groovy plugin available and groovy sources present ('src/main/groovy'). Last condition is important because groovy may be used only for tests.
-
-IMPORTANT: if you have only groovy sources then `groovydocJar` will have javadoc` classifier! This is because maven central requires
-javadoc jar, so even if you write groovy project you have to name it javadoc.
-
-In case of both groovy and java sources, `groovydocJar` will use `groovydoc` classifier, because `javadocJar` already use `javadoc` and have to produce separate artifacts.   
-
-`install` task added to simplify publication to local maven repository: this is simply shortcut for
-gradle's [publishToMavenLocal](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks) task
-(simply shorter to type and more common name after maven).  
-
 #### Pom
 
-Most likely, you will need to configure pom:
+For maven-central publication you need to fill pom:
 
 ```groovy
 pom {
@@ -214,7 +183,10 @@ pom {
         }
     }
 }
-```
+``` 
+
+If your project is hosted on github you may use [github-info](https://github.com/xvik/gradle-github-info-plugin) plugin 
+which fills most pom sections for you automatically.
 
 Read more about pom specifics in [pom plugin description](https://github.com/xvik/gradle-pom-plugin).
 
@@ -227,45 +199,9 @@ runtime     | runtimeOnly
 provided    | compileOnly
 optional    | [gradle feature](https://github.com/xvik/gradle-pom-plugin#optional-dependencies)
 
+See [good article](https://reflectoring.io/maven-scopes-gradle-configurations/) describing maven/gradle scope analogies.
+
 See [pom plugin doc](https://github.com/xvik/gradle-pom-plugin#dependencies) for more details about dependencies scopes in the generated pom
-
-#### Main Jar
-
-Plugin applies default manifest properties:
-
-```groovy
-'Implementation-Title': project.description ?: project.name,
-'Implementation-Version': project.version,
-'Built-By': System.getProperty('user.name'),
-'Built-Date': new Date(),
-'Built-JDK': System.getProperty('java.version'),
-'Built-Gradle': gradle.gradleVersion,
-'Target-JDK': project.targetCompatibility
-```
-
-You can override it:
-
-```groovy
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'My Custom value',
-            'Built-By': 'Me'
-    }
-}
-```
-
-For all not specified properties default values will be used.
-
-Plugin will include additional files inside jar (like maven do) into `META-INF/maven/group/artifact/`
-
-* pom.xml
-* pom.properties
-
-pom.properties contains:
-
-* version
-* groupId
-* artifactId
 
 #### Publication
 
@@ -330,6 +266,72 @@ bintray {
 
 For gradle plugin use `pluginMaven` publication name.
 
+#### Encodings
+
+UTF-8 applied to:
+
+* (all `CompileJava` tasks).options.encoding 
+* (all `CompileGrovy` tasks).options.encoding
+* (all `Javadoc`).options.\[encoding, charSet, docEncoding]
+* (all `Test`).systemProperty 'file.encoding'
+
+Note that groovydoc task does not have encoding configuration, but it should use UTF-8 by defautl. 
+
+For tests, encoding is important (especially on windows) because test forked process will not inherit root gradle encoding configuration. 
+
+#### Tasks 
+
+- `sourcesJar` task is always applied 
+- `javadocJar` if java sources directory present ('src/main/java')
+- `groovydocJar` if groovy plugin available and groovy sources present ('src/main/groovy'). Last condition is important because groovy may be used only for tests.
+
+IMPORTANT: if you have only groovy sources then `groovydocJar` will have javadoc` classifier! This is because maven central requires
+javadoc jar, so even if you write groovy project you have to name it javadoc.
+
+In case of both groovy and java sources, `groovydocJar` will use `groovydoc` classifier, because `javadocJar` already use `javadoc` and have to produce separate artifacts.   
+
+`install` task added to simplify publication to local maven repository: this is simply shortcut for
+gradle's [publishToMavenLocal](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks) task
+(simply shorter to type and more common name after maven).  
+
+#### Main Jar
+
+Plugin applies default manifest properties:
+
+```groovy
+'Implementation-Title': project.description ?: project.name,
+'Implementation-Version': project.version,
+'Built-By': System.getProperty('user.name'),
+'Built-Date': new Date(),
+'Built-JDK': System.getProperty('java.version'),
+'Built-Gradle': gradle.gradleVersion,
+'Target-JDK': project.targetCompatibility
+```
+
+You can override it:
+
+```groovy
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'My Custom value',
+            'Built-By': 'Me'
+    }
+}
+```
+
+For all not specified properties default values will be used.
+
+Plugin will include additional files inside jar (like maven do) into `META-INF/maven/group/artifact/`
+
+* pom.xml
+* pom.properties
+
+pom.properties contains:
+
+* version
+* groupId
+* artifactId
+
 ### Complete usage example
 
 ```groovy
@@ -379,7 +381,13 @@ bintray {
     publications = ['maven']
     ...
 }  
-```
+```   
+
+Example projects:
+
+* [Java library](https://github.com/xvik/dropwizard-guicey), published to maven central
+* [Multi-module java library](https://github.com/xvik/dropwizard-guicey-ext) (with BOM), published to maven central
+* This project (plugin) is also using java-lib so it is an example of usage in gradle plugin 
 
 ### Boilerplate plugin removes
 
