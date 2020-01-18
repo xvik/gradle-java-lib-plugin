@@ -50,7 +50,7 @@ pom {
 bintray {
     user = findProperty('bintrayUser')
     key = findProperty('bintrayKey')
-    publications = ['pluginMaven']
+    publications = ['maven']
     dryRun = false
     publish = true
     pkg {
