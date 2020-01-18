@@ -60,7 +60,7 @@ class GradlePluginCompatibilityKitTest extends AbstractKitTest {
         result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
 
         then: "alias publication created"
-        result.task(":publishPluginMavenPublicationToMavenLocal").outcome == TaskOutcome.SUCCESS
+        result.task(":publishMavenPublicationToMavenLocal").outcome == TaskOutcome.SUCCESS
         result.task(":publishTestPluginPluginMarkerMavenPublicationToMavenLocal").outcome == TaskOutcome.SUCCESS
 
         then: "custom jar tasks used"

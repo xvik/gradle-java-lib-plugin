@@ -50,7 +50,7 @@ class GradlePluginCompatibilityTest extends AbstractTest {
         project.plugins.findPlugin(PomPlugin)
 
         then: "mavenJava publication used"
-        project.publishing.publications.names == ['pluginMaven'] as Set
+        project.publishing.publications.names == ['maven', 'pluginMaven'] as Set
 
         then: "javadoc and sources tasks created"
         project.tasks.javadocJar

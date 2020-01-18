@@ -19,7 +19,6 @@ import org.gradle.api.tasks.compile.GroovyCompile
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
-import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin
 import org.gradle.process.internal.JvmOptions
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
@@ -37,12 +36,12 @@ import java.nio.charset.StandardCharsets
  *     <li> Add 'install' task as shortcut for publishToMavenLocal
  * </ul>
  * <p>
- * In case of gradle plugin (java-gradle-plugin + plugin-publish) use pluginMaven publication instead iof maven
- * because "pluginMaven" name is hardcoded in java-gradle-publish plugin (publication creation could be disabled,
- * but then alias publications, required by gradle portal, would not be created automatically). Plugin-publish
- * also creates it's own javadoc and sources tasks, so manually registering artifacts (only) to prevent this.
- * Overall in case of gradle plugin, 1 maven publication should be used and exactly the same artifacts should
- * be published everywhere (only plugin portal also receive alias publications).
+ * In case of gradle plugin (java-gradle-plugin + plugin-publish) "pluginMaven" publication will be created for
+ * plugins portal publication, but java-lib plugin will still use "maven" publication (for jcenter and maven central
+ * publications). Plugin-publish also creates it's own javadoc and sources tasks, so manually registering
+ * artifacts (only) to prevent this.
+ * Overall, in case of gradle plugin, 2 maven publications should be used, but exactly the same artifacts would
+ * be published everywhere (plugin portal will additionally receive alias publications).
  *
  * @author Vyacheslav Rusakov
  * @since 07.11.2015
@@ -189,23 +188,20 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
-    @SuppressWarnings('NestedBlockDepth')
     private MavenPublication configureMavenPublication(Project project) {
-        // java-gradle-plugin tightly connected to its configuration name, so re-using it instead of default
-        // in order to not create additional publication
+        // java-gradle-plugin will create its own publication pluginMaven, but still plugin configures separate
+        // maven publication because java-gradle-plugin most likely will be applied after java-lib and so
+        // it's not possible to detect it for sure. But it's not a problem: pom will be corrected for both
+        // (and in any case portal does not use this pom). More importantly, to prevent plugin-publish to create
+        // its own javadoc and sources tasks (its done in later in artifacts method)
         // NOTE: java-gradle-plugin will also create alias publications for each plugin, but we will simply don't
         // use them during bintray publication
-        boolean gradlePlugin = project.plugins.hasPlugin(JavaGradlePluginPlugin)
-        String targetName = gradlePlugin ? 'pluginMaven' : 'maven'
         // configure publication
         MavenPublication publication = project.extensions
                 .findByType(PublishingExtension)
                 .publications
-                .maybeCreate(targetName, MavenPublication)
-        // in case of gradle plugin java-gradle-plugin will configure java component
-        if (!gradlePlugin) {
-            publication.from(project.components.getByName('java'))
-        }
+                .maybeCreate('maven', MavenPublication)
+        publication.from(project.components.getByName('java'))
         // in stable publication mode extra jars added directly after tasks registration
         return publication
     }
