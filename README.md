@@ -138,6 +138,10 @@ For gradle 6.0 and above:
 
 ### Usage
 
+Plugin requires [java](https://docs.gradle.org/current/userguide/java_plugin.html) or 
+[groovy](https://docs.gradle.org/current/userguide/groovy_plugin.html) or 
+[java-library](https://docs.gradle.org/current/userguide/java_library_plugin.html) plugins to be enabled.
+
 #### General
 
 You need to specify general info:
