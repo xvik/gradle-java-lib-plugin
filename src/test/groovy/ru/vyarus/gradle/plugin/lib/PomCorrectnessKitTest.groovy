@@ -18,7 +18,7 @@ class PomCorrectnessKitTest extends AbstractKitTest {
             }
             
             dependencies { 
-                compileOnly 'com.google.code.findbugs:annotations:3.0.0'               
+                provided 'com.google.code.findbugs:annotations:3.0.0'               
                 implementation 'org.javassist:javassist:3.16.1-GA'             
             }
             
