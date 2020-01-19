@@ -1,6 +1,11 @@
+### 2.1.0 (2020-01-19)
 * Updated pom plugin (2.1.0): 
-    - Brings back provided and optional scopes, because gradle native features cant completely replace them
-    - compileOnly dependencies no more added to pom (default behaviour reverted)  
+    - Brings back `provided` and `optional` scopes, because gradle native features can't completely replace them
+    - `compileOnly` dependencies no more added to pom (default behaviour reverted)  
+
+Versions 2.0.0 and 2.0.1 are not recommended for usage because of referenced pom plugin
+(there was an attempt to replace optional and provided configurations with native gradle features, 
+but it failed: custom configurations still required).
 
 ### 2.0.1 (2020-01-19) DON'T USE
 * Updated pom plugin (2.0.1) containing fix for provided dependencies declared with BOM

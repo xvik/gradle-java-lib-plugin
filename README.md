@@ -59,7 +59,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:2.0.1'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:2.1.0'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -69,7 +69,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '2.0.1'
+    id 'ru.vyarus.java-lib' version '2.1.0'
 }
 ```
 
@@ -79,7 +79,7 @@ Plugin compiled for java 8, compatible with java 11
 
 Gradle | Version
 --------|-------
-5.1     | 2.0.1
+5.1     | 2.1.0
 4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
 older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
 
@@ -188,23 +188,23 @@ pom {
 }
 ``` 
 
-If your project is hosted on github you may use [github-info](https://github.com/xvik/gradle-github-info-plugin) plugin 
+If your project is hosted on github you may use [github-info](https://github.com/xvik/gradle-github-info-plugin) plugin, 
 which fills most pom sections for you automatically.
 
 Read more about pom specifics in [pom plugin description](https://github.com/xvik/gradle-pom-plugin).
 
-Use the following configuration to get correct scope in the resulted pom:
+Use the following configuration to get correct scopes in the resulted pom:
 
 Maven scope | Gradle configuration
 ------------| ----------------
 compile     | implementation, api
 runtime     | runtimeOnly
-provided    | compileOnly
-optional    | [gradle feature](https://github.com/xvik/gradle-pom-plugin#optional-dependencies)
-
-See [good article](https://reflectoring.io/maven-scopes-gradle-configurations/) describing maven/gradle scope analogies.
+provided    | provided  (**not** compileOnly!)
+optional    | optional, [feature variants](https://github.com/xvik/gradle-pom-plugin#feature-variants)
 
 See [pom plugin doc](https://github.com/xvik/gradle-pom-plugin#dependencies) for more details about dependencies scopes in the generated pom
+
+For BOMs [prefer spring plugin](https://github.com/xvik/gradle-pom-plugin#usage-with-spring-dependency-management-plugin) over gradle native support.
 
 #### Publication
 
@@ -335,7 +335,7 @@ pom.properties contains:
 ```groovy
 plugins {
     id 'java'  // or groovy or java-library
-    id 'ru.vyarus.java-lib' version '2.0.0'
+    id 'ru.vyarus.java-lib' version '2.1.0'
     id 'com.jfrog.bintray' version '1.7.1'
 }
 
