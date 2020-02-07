@@ -226,15 +226,6 @@ publishing.publications.maven.artifacts = [jar, javadocJar]
 
 Here sources are excluded from publishing (note that if you going to publish to maven central sources are required).
 
-##### Gradle plugin
-
-Gradle plugin project will have `java-gradle-plugin`, which declares its own maven publication `pluginMaven`.
-Java-lib will still create separate publication `maven`, but both publications would use the same artifacts and same pom
-modifications will apply for both (but its not important for gradle plugins portal).
-
-Normally, `plugin-publish` plugin creates its own javadoc and sources tasks, but plugin will
-prevent it by configuring `javadocJar` and `sourcesJar` tasks instead.
-
 ##### Publish to repository 
  
 For actual publication only [repository](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:repositories) must be configured:
@@ -263,6 +254,51 @@ bintray {
     ...
 }    
 ```
+
+##### Gradle plugin
+
+Gradle plugin project will have [java-gradle-plugin](https://docs.gradle.org/current/userguide/java_gradle_plugin.html), 
+which declares its own maven publication `pluginMaven` (with main jar as artifact). Also, plugin creates one more 
+publication per declared plugin to publish [plugin marker artifact](https://docs.gradle.org/current/userguide/plugins.html#sec:plugin_markers)
+(required by gradle plugins dsl).
+
+Java-lib plugin will still create separate publication `maven` and you should use it for publishing with bintray 
+(same way as for usual library)
+
+There might be several situations...
+
+###### Gradle plugin repository
+
+For publishing in gradle plugin repository you will use [com.gradle.plugin-publish](https://plugins.gradle.org/docs/publish-plugin) 
+plugin. This plugin normally adds its own source and javadoc tasks.
+
+Java-lib plugin will prevent additional sources and javadoc tasks creation. `plugin-publish`
+use artifacts from `Project.artifacts` and java-lib will register all required artifacts there.
+So overall `maven` publication and artifacts applied to plugins portal will be the same.
+
+Use `maven` publication into maven central or jcenter (or other repo). Ignore `pluginMaven` (containing just one jar).
+
+###### Publishing only to custom repo
+
+This is in-house plugin case, when plugins are published only into corparate repository.
+
+In this case, you most likely will not use bintray and so can't configure exact publication name.
+The simplest solution is to disable `pluginMaven` publication tasks (but marker artifact publications should remain!)
+
+```groovy
+tasks.withType(AbstractPublishToMaven) { Task task ->
+    if (task.name.startsWith("publishPluginMaven")) {
+        task.enabled(false)
+    }
+}
+```    
+
+This will disable: `publishPluginMavenPublicationToMavenLocal` and `publishPluginMavenPublicationToMavenRepository`
+
+And you can simply use `publish` task to trigger all required publications without duplicates.
+
+The same way, `install` will install all required artifacts locally (includin markers) and so it is possible
+to use plugins from local maven repository too (with plugin syntax).
 
 #### Encodings
 
