@@ -1,3 +1,5 @@
+* Updated pom plugin (2.2.0): java-platform compatibility
+
 ### 2.1.0 (2020-01-19)
 * Updated pom plugin (2.1.0): 
     - Brings back `provided` and `optional` scopes, because gradle native features can't completely replace them
