@@ -10,7 +10,7 @@ import java.util.zip.ZipFile
  */
 class UpstreamKitTest extends AbstractKitTest {
 
-    String GRADLE_VERSION = '6.0'
+    String GRADLE_VERSION = '7.0'
 
     def "Check install task"() {
         setup:
@@ -182,12 +182,15 @@ class UpstreamKitTest extends AbstractKitTest {
             group 'ru.vyarus'
             version 1.0
         """
+        file('settings.gradle') << """
+rootProject.name = "test"
+"""
 
         when: "run pom task"
         def result = runVer(GRADLE_VERSION, 'install')
 
 
-        String artifactId = projectName()
+        String artifactId = 'test'
         String baseName = artifactId + '-1.0'
         ZipFile jar = new ZipFile(file("build/repo/ru/vyarus/$artifactId/1.0/${baseName}.jar"))
 
@@ -212,7 +215,10 @@ class UpstreamKitTest extends AbstractKitTest {
         props != null
         println props
         props.contains('groupId: ru.vyarus')
-        props.contains("artifactId: ${projectName()}")
+        props.contains("artifactId: $artifactId")
         props.contains('version: 1.0')
+
+        cleanup:
+        jar?.close()
     }
 }

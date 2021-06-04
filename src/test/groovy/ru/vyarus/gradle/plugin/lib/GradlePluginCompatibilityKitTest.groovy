@@ -47,12 +47,15 @@ class GradlePluginCompatibilityKitTest extends AbstractKitTest {
             group 'ru.vyarus'
             version 1.0
         """
+        file('settings.gradle') << """
+rootProject.name = "test"
+"""
 
         when: "run pom task"
         def result = run('install')
 
 
-        String artifactId = projectName()
+        String artifactId = 'test'
         File deploy = file("build/repo/ru/vyarus/$artifactId/1.0/")
 
         then: "task done"
@@ -108,12 +111,15 @@ class GradlePluginCompatibilityKitTest extends AbstractKitTest {
         println props
         props != null
         props.contains('groupId: ru.vyarus')
-        props.contains("artifactId: ${projectName()}")
+        props.contains("artifactId: $artifactId")
         props.contains('version: 1.0')
 
         then: "jar contains plugin desriptor"
         String gradleDesc = jar.getInputStream(jar.getEntry("META-INF/gradle-plugins/ru.vyarus.test.properties")).text
         println gradleDesc
         gradleDesc.trim()  == 'implementation-class=ru.vyarus.TestPlugin'
+
+        cleanup:
+        jar?.close()
     }
 }

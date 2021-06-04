@@ -21,12 +21,15 @@ class JarModificationKitTest extends AbstractKitTest {
             group 'ru.vyarus'
             version 1.0
         """
+        file('settings.gradle') << """
+rootProject.name = "test"
+"""
 
         when: "run pom task"
         def result = run('install')
 
 
-        String artifactId = projectName()
+        String artifactId = 'test'
         String baseName = artifactId + '-1.0'
         ZipFile jar = new ZipFile(file("build/repo/ru/vyarus/$artifactId/1.0/${baseName}.jar"))
 
@@ -51,8 +54,11 @@ class JarModificationKitTest extends AbstractKitTest {
         props != null
         println props
         props.contains('groupId: ru.vyarus')
-        props.contains("artifactId: ${projectName()}")
+        props.contains("artifactId: $artifactId")
         props.contains('version: 1.0')
+
+        cleanup:
+        jar?.close()
     }
 
     def "Check jar manifest override"() {
@@ -94,5 +100,8 @@ class JarModificationKitTest extends AbstractKitTest {
         manifest.contains("Built-Date:")
         manifest.contains("Built-JDK:")
         manifest.contains("Built-Gradle:")
+
+        cleanup:
+        jar?.close()
     }
 }

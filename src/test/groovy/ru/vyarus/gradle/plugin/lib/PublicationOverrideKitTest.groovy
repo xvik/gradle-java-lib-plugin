@@ -22,12 +22,15 @@ class PublicationOverrideKitTest extends AbstractKitTest {
 
             publishing.publications.maven.artifacts = [jar, javadocJar]
         """
+        file('settings.gradle') << """
+rootProject.name = "test"
+"""
 
         when: "run pom task"
         def result = run('install')
 
 
-        String artifactId = projectName()
+        String artifactId = 'test'
         File deploy = file("build/repo/ru/vyarus/$artifactId/1.0/")
 
         then: "task done"

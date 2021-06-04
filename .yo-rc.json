@@ -9,15 +9,9 @@
     "projectVersion": "0.1.0",
     "projectDesc": "Gradle Java-lib plugin",
     "pluginPortalDesc": "Common gradle configuration for Java or Groovy library",
-    "targetJava": "1.7",
     "pluginPortalTags": "java, groovy, lib",
-    "mirrorToJcenter": true,
     "pluginPortalUseCustomGroup": true,
-    "bintrayUser": "vyarus",
-    "bintrayRepo": "xvik",
-    "bintrayTags": "gradle, java, groovy, lib",
-    "bintraySignFiles": true,
-    "mavenCentralSync": true,
-    "usedGeneratorVersion": "1.8.0"
+    "usedGeneratorVersion": "2.0.0",
+    "centralPublish": true
   }
 }
