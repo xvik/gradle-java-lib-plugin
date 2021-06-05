@@ -1,6 +1,10 @@
 * Updated pom plugin (2.2.0): java-platform compatibility
 * Add java-platform plugin support (assuming declared platform published as BOM):
     register pom plugin, configure 'bom' publication, add install task
+* Add `javaLib` configuration closure:
+    - disableGradleMetadata() - disables gradle metadata publishing
+    - bonArtifactId and bomDescription - corrects bom pom when platform declared in the root project
+    
 
 ### 2.1.0 (2020-01-19)
 * Updated pom plugin (2.1.0): 

@@ -22,4 +22,16 @@ class JavaLibExtension {
      * the generated pom (otherwise it would be root project description).
      */
     String bomDescription
+
+    /**
+     * Gradle metadata publishing is enabled by default. Set to false to avoid metadata publishing.
+     */
+    boolean gradleMetadata = true
+
+    /**
+     * Disable gradle metadata publishing.
+     */
+    void disableGradleMetadata() {
+        gradleMetadata = false
+    }
 }

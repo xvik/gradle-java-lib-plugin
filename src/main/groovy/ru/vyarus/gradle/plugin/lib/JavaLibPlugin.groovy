@@ -13,6 +13,7 @@ import org.gradle.api.plugins.JavaPlatformPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.tasks.GenerateModuleMetadata
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
@@ -76,28 +77,8 @@ class JavaLibPlugin implements Plugin<Project> {
             JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension)
             // different name used for publication
             MavenPublication bom = configureBomPublication(project)
-
-            project.configure(project) {
-                // allow dependencies declaration in BOM
-                javaPlatform.allowDependencies()
-
-                afterEvaluate {
-                    if (extension.bomArtifactId) {
-                        // by default artifact name is project name and if root bom would be published it should
-                        // have a different name
-                        bom.artifactId = extension.bomArtifactId
-                        pom {
-                            name extension.bomArtifactId
-                        }
-                    }
-                    if (extension.bomDescription) {
-                        pom {
-                            description extension.bomDescription
-                        }
-                    }
-                }
-            }
-
+            configurePlatform(project, extension, bom)
+            configureGradleMetadata(project, extension)
             addInstallTask(project) {
                 project.logger.warn "INSTALLED $project.group:$bom.artifactId:$project.version"
             }
@@ -106,7 +87,7 @@ class JavaLibPlugin implements Plugin<Project> {
         // full activation when java plugin is enabled
         project.plugins.withType(JavaPlugin) {
             project.plugins.apply(PomPlugin)
-
+            JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension)
             // assume gradle 5.0 and above - stable publishing enabled
             MavenPublication publication = configureMavenPublication(project)
             configureEncoding(project)
@@ -114,8 +95,32 @@ class JavaLibPlugin implements Plugin<Project> {
             addSourcesJarTask(project, publication)
             addJavadocJarTask(project, publication)
             addGroovydocJarTask(project, publication)
+            configureGradleMetadata(project, extension)
             addInstallTask(project) {
                 project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
+            }
+        }
+    }
+
+    private void configurePlatform(Project project, JavaLibExtension extension, MavenPublication bom) {
+        project.configure(project) {
+            // allow dependencies declaration in BOM
+            javaPlatform.allowDependencies()
+
+            afterEvaluate {
+                if (extension.bomArtifactId) {
+                    // by default artifact name is project name and if root bom would be published it should
+                    // have a different name
+                    bom.artifactId = extension.bomArtifactId
+                    pom {
+                        name extension.bomArtifactId
+                    }
+                }
+                if (extension.bomDescription) {
+                    pom {
+                        description extension.bomDescription
+                    }
+                }
             }
         }
     }
@@ -272,6 +277,17 @@ class JavaLibPlugin implements Plugin<Project> {
                 group = 'publishing'
                 description = 'Alias for publishToMavenLocal task'
                 doLast last
+            }
+        }
+    }
+
+    private void configureGradleMetadata(Project project, JavaLibExtension extension) {
+        project.afterEvaluate {
+            // disable gradle metadata publishing (usually it confuse a lot)
+            if (!extension.gradleMetadata) {
+                project.tasks.withType(GenerateModuleMetadata).configureEach {
+                    enabled = false
+                }
             }
         }
     }
