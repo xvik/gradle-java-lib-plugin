@@ -77,4 +77,23 @@ class JavaLibPluginTest extends AbstractTest {
         then: "install task created"
         project.tasks.install
     }
+
+    def "Check plugin registration for java-platform"() {
+
+        when: "activating plugin"
+        file('src/main/java').mkdirs()
+        Project project = project {
+            apply plugin: 'java-platform'
+            apply plugin: "ru.vyarus.java-lib"
+        }
+
+        then: "pom plugin activated"
+        project.plugins.findPlugin(PomPlugin)
+
+        then: "bom publication registered"
+        project.publishing.publications.bom
+
+        then: "install task created"
+        project.tasks.install
+    }
 }

@@ -9,6 +9,7 @@ import org.gradle.api.artifacts.PublishArtifact
 import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.GroovyPlugin
+import org.gradle.api.plugins.JavaPlatformPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -36,6 +37,19 @@ import java.nio.charset.StandardCharsets
  *     <li> Add 'install' task as shortcut for publishToMavenLocal
  * </ul>
  * <p>
+ * When used with java-platform plugin:
+ * <ul>
+ *     <li> Applies 'ru.vyarus.pom' plugin
+ *     <li> Configure `bom` maven publication
+ *     <li> Add 'install' task as shortcut for publishToMavenLocal
+ *     <li> Activates platform dependencies (javaPlatform.allowDependencies())
+ * </ul>
+ * Java-publish might be used in the root project (for multi-module project) and in this case custom artifact name
+ * would be required (most likely, BOM artifact should not be called the same as project name. For this case
+ * special extension must be used: {@code libJava.bomArtifactId = 'something-bom'}. Name in the generated pom would be
+ * changed accordingly. Also, {@code libJava.bomDescription} may be used to specify custom description instead
+ * of root project description.
+ * <p>
  * In case of gradle plugin (java-gradle-plugin + plugin-publish) "pluginMaven" publication will be created for
  * plugins portal publication, but java-lib plugin will still use "maven" publication (for jcenter and maven central
  * publications). Plugin-publish also creates it's own javadoc and sources tasks, so manually registering
@@ -56,7 +70,40 @@ class JavaLibPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        // activated only when java plugin is enabled
+        // partial activation for java-platform plugin (when root module is a BOM)
+        project.plugins.withType(JavaPlatformPlugin) {
+            project.plugins.apply(PomPlugin)
+            JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension)
+            // different name used for publication
+            MavenPublication bom = configureBomPublication(project)
+
+            project.configure(project) {
+                // allow dependencies declaration in BOM
+                javaPlatform.allowDependencies()
+
+                afterEvaluate {
+                    if (extension.bomArtifactId) {
+                        // by default artifact name is project name and if root bom would be published it should
+                        // have a different name
+                        bom.artifactId = extension.bomArtifactId
+                        pom {
+                            name extension.bomArtifactId
+                        }
+                    }
+                    if (extension.bomDescription) {
+                        pom {
+                            description extension.bomDescription
+                        }
+                    }
+                }
+            }
+
+            addInstallTask(project) {
+                project.logger.warn "INSTALLED $project.group:$bom.artifactId:$project.version"
+            }
+        }
+
+        // full activation when java plugin is enabled
         project.plugins.withType(JavaPlugin) {
             project.plugins.apply(PomPlugin)
 
@@ -67,7 +114,9 @@ class JavaLibPlugin implements Plugin<Project> {
             addSourcesJarTask(project, publication)
             addJavadocJarTask(project, publication)
             addGroovydocJarTask(project, publication)
-            addInstallTask(project)
+            addInstallTask(project) {
+                project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
+            }
         }
     }
 
@@ -206,15 +255,23 @@ class JavaLibPlugin implements Plugin<Project> {
         return publication
     }
 
-    private void addInstallTask(Project project) {
+    private MavenPublication configureBomPublication(Project project) {
+        MavenPublication publication = project.extensions
+                .findByType(PublishingExtension)
+                .publications
+                .maybeCreate('bom', MavenPublication)
+        publication.from(project.components.getByName('javaPlatform'))
+        // in stable publication mode extra jars added directly after tasks registration
+        return publication
+    }
+
+    private void addInstallTask(Project project, Closure last) {
         project.tasks.register('install') {
             it.with {
                 dependsOn 'publishToMavenLocal'
                 group = 'publishing'
                 description = 'Alias for publishToMavenLocal task'
-                doLast {
-                    logger.warn "INSTALLED $project.group:$project.name:$project.version"
-                }
+                doLast last
             }
         }
     }
