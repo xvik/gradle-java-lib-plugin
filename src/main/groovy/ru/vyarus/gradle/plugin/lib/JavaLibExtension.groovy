@@ -29,9 +29,37 @@ class JavaLibExtension {
     boolean gradleMetadata = true
 
     /**
+     * Javadoc (groovydoc) artifact addition. Enabled by default.
+     * Ignored with java-publish plugin.
+     */
+    boolean addJavadoc = true
+
+    /**
+     * Sources artifact addition. Enabled by default.
+     * Ignored with java-publish plugin.
+     */
+    boolean addSources = true
+
+    /**
      * Disable gradle metadata publishing.
      */
     void disableGradleMetadata() {
         gradleMetadata = false
+    }
+
+    /**
+     * Disable javadoc (groovydoc) publication.
+     * Ignored with java-publish plugin.
+     */
+    void disableJavadocPublish() {
+        addJavadoc = false
+    }
+
+    /**
+     * Disable sources publication.
+     * Ignored with java-publish plugin.
+     */
+    void disableSourcesPublish() {
+        addSources = false
     }
 }

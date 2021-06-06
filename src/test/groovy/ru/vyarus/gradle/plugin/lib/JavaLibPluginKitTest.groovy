@@ -39,6 +39,42 @@ class JavaLibPluginKitTest extends AbstractKitTest {
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
+    def "Check jar only publish"() {
+        setup:
+        file('src/main/java').mkdirs()
+        build """
+            plugins {
+                id 'java'
+                id 'ru.vyarus.java-lib'
+            }
+            
+            javaLib {
+                disableJavadocPublish()
+                disableSourcesPublish()
+            }
+
+            group 'ru.vyarus'
+            version 1.0
+        """
+
+        when: "run pom task"
+        def result = run('install')
+
+
+        String artifactId = projectName()
+        File deploy = file("build/repo/ru/vyarus/$artifactId/1.0/")
+
+        then: "task done"
+        result.task(":install").outcome == TaskOutcome.SUCCESS
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+
+        then: "artifacts deployed"
+        deploy.exists()
+        def baseName = artifactId + '-1.0'
+        withoutModuleFile(deploy) ==
+                ["${baseName}.jar", "${baseName}.pom"] as Set<String>
+    }
+
     def "Check install task for groovy"() {
         setup:
         file('src/main/groovy').mkdirs()

@@ -92,9 +92,9 @@ class JavaLibPlugin implements Plugin<Project> {
             MavenPublication publication = configureMavenPublication(project)
             configureEncoding(project)
             configureJar(project, publication)
-            addSourcesJarTask(project, publication)
-            addJavadocJarTask(project, publication)
-            addGroovydocJarTask(project, publication)
+            addSourcesJarTask(project, publication, extension)
+            addJavadocJarTask(project, publication, extension)
+            addGroovydocJarTask(project, publication, extension)
             configureGradleMetadata(project, extension)
             addInstallTask(project) {
                 project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
@@ -192,7 +192,7 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
-    private void addSourcesJarTask(Project project, MavenPublication publication) {
+    private void addSourcesJarTask(Project project, MavenPublication publication, JavaLibExtension extension) {
         TaskProvider<Jar> sourcesJar = project.tasks.register('sourcesJar', Jar) {
             it.with {
                 dependsOn project.tasks.named('classes')
@@ -202,9 +202,12 @@ class JavaLibPlugin implements Plugin<Project> {
             }
         }
         registerArtifact(project, publication, sourcesJar)
+        project.afterEvaluate {
+            sourcesJar.configure { enabled = extension.addSources }
+        }
     }
 
-    private void addJavadocJarTask(Project project, MavenPublication publication) {
+    private void addJavadocJarTask(Project project, MavenPublication publication, JavaLibExtension extension) {
         // apply only if java sources exist
         boolean hasJavaSources = project.sourceSets.main.java.srcDirs.find { it.exists() }
         if (hasJavaSources) {
@@ -218,10 +221,13 @@ class JavaLibPlugin implements Plugin<Project> {
                 }
             }
             registerArtifact(project, publication, javadocJar)
+            project.afterEvaluate {
+                javadocJar.configure { enabled = extension.addJavadoc }
+            }
         }
     }
 
-    private void addGroovydocJarTask(Project project, MavenPublication publication) {
+    private void addGroovydocJarTask(Project project, MavenPublication publication, JavaLibExtension extension) {
         // apply only if groovy enabled
         project.plugins.withType(GroovyPlugin) {
             // apply only if groovy sources exist
@@ -238,6 +244,9 @@ class JavaLibPlugin implements Plugin<Project> {
                     }
                 }
                 registerArtifact(project, publication, groovydocJar)
+                project.afterEvaluate {
+                    groovydocJar.configure { enabled = extension.addJavadoc }
+                }
             }
         }
     }
