@@ -49,8 +49,8 @@ import java.nio.charset.StandardCharsets
  * </ul>
  * Java-publish might be used in the root project (for multi-module project) and in this case custom artifact name
  * would be required (most likely, BOM artifact should not be called the same as project name. For this case
- * special extension must be used: {@code libJava.bomArtifactId = 'something-bom'}. Name in the generated pom would be
- * changed accordingly. Also, {@code libJava.bomDescription} may be used to specify custom description instead
+ * special extension must be used: {@code libJava.bom.artifactId = 'something-bom'}. Name in the generated pom would be
+ * changed accordingly. Also, {@code libJava.bom.description} may be used to specify custom description instead
  * of root project description.
  * <p>
  * In case of gradle plugin (java-gradle-plugin + plugin-publish) "pluginMaven" publication will be created for
@@ -76,7 +76,7 @@ class JavaLibPlugin implements Plugin<Project> {
         // partial activation for java-platform plugin (when root module is a BOM)
         project.plugins.withType(JavaPlatformPlugin) {
             project.plugins.apply(PomPlugin)
-            JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension)
+            JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension, project)
             // different name used for publication
             MavenPublication bom = configureBomPublication(project)
             configurePlatform(project, extension, bom)
@@ -90,7 +90,7 @@ class JavaLibPlugin implements Plugin<Project> {
         // full activation when java plugin is enabled
         project.plugins.withType(JavaPlugin) {
             project.plugins.apply(PomPlugin)
-            JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension)
+            JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension, project)
             // assume gradle 5.0 and above - stable publishing enabled
             MavenPublication publication = configureMavenPublication(project)
             configureEncoding(project)
@@ -112,17 +112,17 @@ class JavaLibPlugin implements Plugin<Project> {
             javaPlatform.allowDependencies()
 
             afterEvaluate {
-                if (extension.bomArtifactId) {
+                if (extension.bom?.artifactId) {
                     // by default artifact name is project name and if root bom would be published it should
                     // have a different name
-                    bom.artifactId = extension.bomArtifactId
+                    bom.artifactId = extension.bom.artifactId
                     pom {
-                        name extension.bomArtifactId
+                        name extension.bom.artifactId
                     }
                 }
-                if (extension.bomDescription) {
+                if (extension.bom?.description) {
                     pom {
-                        description extension.bomDescription
+                        description extension.bom.description
                     }
                 }
             }

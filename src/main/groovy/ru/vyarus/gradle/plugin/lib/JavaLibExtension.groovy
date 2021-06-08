@@ -1,6 +1,8 @@
 package ru.vyarus.gradle.plugin.lib
 
 import groovy.transform.CompileStatic
+import org.gradle.api.Action
+import org.gradle.api.Project
 
 /**
  * Java-lib plugin extension for fine-tuning. Accessible as `javaLib` closure.
@@ -9,19 +11,18 @@ import groovy.transform.CompileStatic
  * @since 06.06.2021
  */
 @CompileStatic
+@SuppressWarnings('ConfusingMethodName')
 class JavaLibExtension {
 
-    /**
-     * Used with java-platform plugin when platform is declared in the root module to rename artifact (which is by
-     * default equal to project name)
-     */
-    String bomArtifactId
+    private final Project project
 
-    /**
-     * Used with java-platform plugin when platform is declared in the root module to specify custom description in
-     * the generated pom (otherwise it would be root project description).
+    JavaLibExtension(Project project) {
+        this.project = project
+    }
+/**
+     * Java-platform plugin related configurations.
      */
-    String bomDescription
+    JavaPlatform bom = new JavaPlatform()
 
     /**
      * Gradle metadata publishing is enabled by default. Set to false to avoid metadata publishing.
@@ -72,5 +73,33 @@ class JavaLibExtension {
      */
     void enableSnapshotsSigning() {
         signSnapshots = true
+    }
+
+    // Utility methods required for sub objects configuration
+
+    void bom(Closure<?> config) {
+        project.configure(bom, config)
+    }
+
+    void bom(Action<JavaPlatform> config) {
+        config.execute(bom)
+    }
+
+    /**
+     * Configuration for java-platform plugin. Required for case when java-platform is declared in the root project,
+     * but published bom maven coordinates must differ from root project name.
+     */
+    static class JavaPlatform {
+        /**
+         * Used with java-platform plugin when platform is declared in the root module to rename artifact (which is by
+         * default equal to project name)
+         */
+        String artifactId
+
+        /**
+         * Used with java-platform plugin when platform is declared in the root module to specify custom description in
+         * the generated pom (otherwise it would be root project description).
+         */
+        String description
     }
 }

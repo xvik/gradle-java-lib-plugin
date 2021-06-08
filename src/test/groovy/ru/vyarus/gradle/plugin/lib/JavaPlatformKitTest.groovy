@@ -54,9 +54,9 @@ class JavaPlatformKitTest extends AbstractKitTest {
                 id 'ru.vyarus.java-lib'
             }
             
-            javaLib {
-                bomArtifactId = 'bom'
-                bomDescription = 'Sample BOM'
+            javaLib.bom {
+                artifactId = 'bom'
+                description = 'Sample BOM'
             }
 
             group 'ru.vyarus'
