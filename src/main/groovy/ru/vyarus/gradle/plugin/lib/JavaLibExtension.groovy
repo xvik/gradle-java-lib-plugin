@@ -3,6 +3,7 @@ package ru.vyarus.gradle.plugin.lib
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Project
+import ru.vyarus.gradle.plugin.pom.PomExtension
 
 /**
  * Java-lib plugin extension for fine-tuning. Accessible as `javaLib` closure.
@@ -83,6 +84,16 @@ class JavaLibExtension {
 
     void bom(Action<JavaPlatform> config) {
         config.execute(bom)
+    }
+
+    // shortcuts for pom plugin configuration under javaLib.pom closure instead of pomGeneration
+    // (unification shortcuts)
+    void pom(Closure<?> config) {
+        project.configure(project.extensions.findByType(PomExtension), config)
+    }
+
+    void pom(Action<PomExtension> config) {
+        config.execute(project.extensions.findByType(PomExtension))
     }
 
     /**

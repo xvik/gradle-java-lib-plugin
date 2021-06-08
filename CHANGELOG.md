@@ -9,6 +9,7 @@
         * bom.artifactId and bom.description - corrects bom pom when platform declared in the root project
     - disableJavadocPublish() and disableSourcesPublish() - disable javadoc and sources publish, enabled by default
     - enableSnapshotsSigning() - enables signing for snapshot versions (disabled by default)
+    - pom - shortcut for pom plugin configuration (to use instead of pomGeneration)
     
 
 ### 2.1.0 (2020-01-19)
