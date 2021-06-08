@@ -182,4 +182,51 @@ rootProject.name = "test"
         withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", 'maven-metadata-local.xml'] as Set<String>
     }
+
+    def "Check snapshots signing enabled"() {
+        setup:
+        file('src/main/java').mkdirs()
+        build """
+            plugins {
+                id 'java'
+                id 'signing'
+                id 'ru.vyarus.java-lib'
+            }
+            
+            javaLib {
+                disableGradleMetadata()
+                disableJavadocPublish()
+                disableSourcesPublish()
+                enableSnapshotsSigning()
+            }
+
+            group 'ru.vyarus'
+            version '1.0-SNAPSHOT'
+           
+            ext['signing.keyId']='78065050'
+            ext['signing.password']=
+            ext['signing.secretKeyRingFile']='test.gpg'
+        """
+        fileFromClasspath('test.gpg', '/cert/test.gpg')
+        file('settings.gradle') << """
+rootProject.name = "test"
+"""
+
+        when: "run pom task"
+        def result = run('install')
+
+
+        String artifactId = 'test'
+        File deploy = file("build/repo/ru/vyarus/$artifactId/1.0-SNAPSHOT/")
+
+        then: "task done"
+        result.task(":install").outcome == TaskOutcome.SUCCESS
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0-SNAPSHOT")
+
+        then: "artifacts deployed"
+        deploy.exists()
+        def baseName = artifactId + '-1.0-SNAPSHOT'
+        withoutModuleFile(deploy) ==
+                ["${baseName}.jar", "${baseName}.jar.asc", "${baseName}.pom", "${baseName}.pom.asc", 'maven-metadata-local.xml'] as Set<String>
+    }
 }

@@ -39,6 +39,10 @@ class JavaLibExtension {
      * Ignored with java-publish plugin.
      */
     boolean addSources = true
+    /**
+     * Do not sign snapshot versions (so project could be built without additional certificates configuration).
+     */
+    boolean signSnapshots = false
 
     /**
      * Disable gradle metadata publishing.
@@ -61,5 +65,12 @@ class JavaLibExtension {
      */
     void disableSourcesPublish() {
         addSources = false
+    }
+
+    /**
+     * Enables artifacts signing for snapshots (disabled by default).
+     */
+    void enableSnapshotsSigning() {
+        signSnapshots = true
     }
 }

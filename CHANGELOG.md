@@ -7,6 +7,7 @@
     - disableGradleMetadata() - disables gradle metadata publishing
     - bonArtifactId and bomDescription - corrects bom pom when platform declared in the root project
     - disableJavadocPublish() and disableSourcesPublish() - disable javadoc and sources publish, enabled by default
+    - enableSnapshotsSigning() - enables signing for snapshot versions (disabled by default)
     
 
 ### 2.1.0 (2020-01-19)
