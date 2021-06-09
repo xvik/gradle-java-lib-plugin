@@ -2,6 +2,7 @@ package ru.vyarus.gradle.plugin.lib
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
+import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -11,6 +12,7 @@ import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlatformPlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.ProjectReportsPlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.tasks.GenerateModuleMetadata
@@ -104,6 +106,11 @@ class JavaLibPlugin implements Plugin<Project> {
             addInstallTask(project) {
                 project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
             }
+        }
+
+        // helper task to open dependency report in browser
+        project.plugins.withType(ProjectReportsPlugin) {
+            addDependenciesTreeTask(project)
         }
     }
 
@@ -324,6 +331,26 @@ class JavaLibPlugin implements Plugin<Project> {
                 // java 11 auto module name
                 project.tasks.jar.manifest {
                     attributes 'Automatic-Module-Name': extension.autoModuleName
+                }
+            }
+        }
+    }
+
+    private void addDependenciesTreeTask(Project project) {
+        project.tasks.register('openDependencyReport').configure {
+            (it as DefaultTask).with {
+                group = 'help'
+                dependsOn = ['htmlDependencyReport']
+                description = 'Opens gradle htmlDependencyReport in browser'
+                // prevent calling task on all subprojects
+                impliesSubProjects = true
+                doLast {
+                    File report = project.file("build/reports/project/dependencies/root.${project.name}.html")
+                    if (!report.exists()) {
+                        // for multi-module project root, if reports aggregation enabled name would be different
+                        report = project.file('build/reports/project/dependencies/root.html')
+                    }
+                    java.awt.Desktop.desktop.open(report)
                 }
             }
         }

@@ -3,6 +3,8 @@
     register pom plugin, configure 'bom' publication, add install task
 * Add automatic signing configuration when 'signing' plugin applied
   (snapshots not signed - only release versions)
+* Add openDependencyReport task when project-report plugin enabled
+  (task opens htmlDependencyReport directly in the browser)
 * Add `javaLib` configuration closure:
     - disableGradleMetadata() - disables gradle metadata publishing
     - java-platform plugin related configurations (bom sub-closure):
