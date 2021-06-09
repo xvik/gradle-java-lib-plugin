@@ -16,40 +16,37 @@ import ru.vyarus.gradle.plugin.pom.PomExtension
 class JavaLibExtension {
 
     private final Project project
-    private final PomExtension pom;
+    // property not exposed directly to prevent accidental override
+    private final PomExtension pom
 
     JavaLibExtension(Project project) {
         this.project = project
         this.pom = project.extensions.findByType(PomExtension)
     }
-/**
- * Java-platform plugin related configurations.
- */
+
+    /**
+     * Java-platform plugin related configurations.
+     */
     JavaPlatform bom = new JavaPlatform()
 
     /**
-     * Gradle metadata publishing is enabled by default. Set to false to avoid metadata publishing.
+     * Automatic-Module-Name meta-inf property value (java 11 modules).
+     * Object used for type to allow lazy-evaluated GStrings usage.
      */
+    Object autoModuleName
+
+    // -----------------------------------  method-based configuration
+    //                                      (properties accessible, but not supposed to be used)
+
     boolean gradleMetadata = true
-
-    /**
-     * Javadoc (groovydoc) artifact addition. Enabled by default.
-     * Ignored with java-publish plugin.
-     */
     boolean addJavadoc = true
-
-    /**
-     * Sources artifact addition. Enabled by default.
-     * Ignored with java-publish plugin.
-     */
     boolean addSources = true
-    /**
-     * Do not sign snapshot versions (so project could be built without additional certificates configuration).
-     */
     boolean signSnapshots = false
 
     /**
-     * Disable gradle metadata publishing.
+     * Disable gradle metadata publishing. Metadata files contains additional gradle dependencies semantic which
+     * is impossible to express in pom file. In majority of cases this file is not required and may be excluded
+     * to avoid publishing additional artifact (besides, some repos might complain about it).
      */
     void disableGradleMetadata() {
         gradleMetadata = false
@@ -72,35 +69,54 @@ class JavaLibExtension {
     }
 
     /**
-     * Enables artifacts signing for snapshots (disabled by default).
+     * Enables artifacts signing for snapshots (disabled by default). By default, signing for snapshot versions
+     * disabled to simplify builds (no additional certificates configuration required to build project).
      */
     void enableSnapshotsSigning() {
         signSnapshots = true
     }
 
-    // Utility methods required for sub objects configuration
+    // -----------------------------------  Utility methods required for sub objects configuration
 
+    /**
+     * Bom sub-object configuration. Used only with java-platform plugin when platform declared in the root project.
+     *
+     * @param config configuration closure
+     */
     void bom(Closure<?> config) {
         project.configure(bom, config)
     }
 
+    /**
+     * Bom  sub-object configuration. Used only with java-platform plugin when platform declared in the root project.
+     *
+     * @param config configuration action
+     */
     void bom(Action<JavaPlatform> config) {
         config.execute(bom)
     }
 
-    // shortcuts for pom plugin configuration under javaLib.pom closure instead of pomGeneration
-    // (unification shortcuts)
+    /**
+     * Shortcut for pom plugin configuration under javaLib.pom closure instead of pomGeneration (unification).
+     *
+     * @param config configuration closure
+     */
     void pom(Closure<?> config) {
         project.configure(pom, config)
     }
 
+    /**
+     * Shortcut for pom plugin configuration under javaLib.pom closure instead of pomGeneration (unification).
+     *
+     * @param config configuration action
+     */
     void pom(Action<PomExtension> config) {
         config.execute(pom)
     }
 
     /**
      * Shortcut for pom plugin configuration extension access. Required for cases like:
-     * {@code javaLib.pom.forceVersions( )}
+     * <pre>javaLib.pom.forceVersions()</pre>
      *
      * @return pom plugin configuration extension
      */

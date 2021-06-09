@@ -100,6 +100,7 @@ class JavaLibPlugin implements Plugin<Project> {
             addGroovydocJarTask(project, publication, extension)
             configureGradleMetadata(project, extension)
             configureSigning(project, extension, publication)
+            applyAutoModuleName(project, extension)
             addInstallTask(project) {
                 project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
             }
@@ -313,6 +314,17 @@ class JavaLibPlugin implements Plugin<Project> {
             // snapshots not signed to simplify project usage (no need for cert during local dev)
             project.tasks.withType(Sign).configureEach {
                 it.onlyIf { extension.signSnapshots || !project.version.toString().endsWith('SNAPSHOT') }
+            }
+        }
+    }
+
+    private void applyAutoModuleName(Project project, JavaLibExtension extension) {
+        project.afterEvaluate {
+            if (extension.autoModuleName) {
+                // java 11 auto module name
+                project.tasks.jar.manifest {
+                    attributes 'Automatic-Module-Name': extension.autoModuleName
+                }
             }
         }
     }

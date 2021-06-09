@@ -104,4 +104,35 @@ rootProject.name = "test"
         cleanup:
         jar?.close()
     }
+
+    def "Check auto module name appliance"() {
+
+        setup:
+        file('src/main/java').mkdirs()
+        build """
+            plugins {
+                id 'java'
+                id 'ru.vyarus.java-lib'
+            }
+
+            group 'ru.vyarus'
+            version 1.0
+
+            javaLib.autoModuleName = "\$project.group-test"           
+        """
+
+        when: "run pom task"
+        def result = run('install')
+        String artifactId = projectName()
+        String baseName = artifactId + '-1.0'
+        ZipFile jar = new ZipFile(file("build/repo/ru/vyarus/$artifactId/1.0/${baseName}.jar"))
+        String manifest = jar.getInputStream(jar.getEntry('META-INF/MANIFEST.MF')).text
+        println manifest
+
+        then: "module name applied"
+        manifest.contains("Automatic-Module-Name: ru.vyarus-test")
+
+        cleanup:
+        jar?.close()
+    }
 }

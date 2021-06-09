@@ -10,6 +10,7 @@
     - disableJavadocPublish() and disableSourcesPublish() - disable javadoc and sources publish, enabled by default
     - enableSnapshotsSigning() - enables signing for snapshot versions (disabled by default)
     - pom - shortcut for pom plugin configuration (to use instead of pomGeneration)
+    - autoModuleName - shortcut for defining Automatic-Module-Name manifest property
     
 
 ### 2.1.0 (2020-01-19)
