@@ -1,6 +1,7 @@
 package ru.vyarus.gradle.plugin.lib
 
 import org.gradle.api.Project
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
 /**
@@ -95,5 +96,19 @@ class JavaLibPluginTest extends AbstractTest {
 
         then: "install task created"
         project.tasks.install
+    }
+
+    def "Check jacoco xml report active"() {
+
+        when: "activating plugin"
+        file('src/main/java').mkdirs()
+        Project project = project {
+            apply plugin: 'java'
+            apply plugin: 'jacoco'
+            apply plugin: "ru.vyarus.java-lib"
+        }
+
+        then: "xml report active"
+        (project.tasks.findByName('jacocoTestReport') as JacocoReport).reports.xml.enabled
     }
 }

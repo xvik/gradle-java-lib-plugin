@@ -5,6 +5,7 @@
   (snapshots not signed - only release versions)
 * Add openDependencyReport task when project-report plugin enabled
   (task opens htmlDependencyReport directly in the browser)
+* Enable jacoco xml report by default (required for coverage services)  
 * Add `javaLib` configuration closure:
     - disableGradleMetadata() - disables gradle metadata publishing
     - java-platform plugin related configurations (bom sub-closure):

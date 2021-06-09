@@ -26,6 +26,8 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningPlugin
 import org.gradle.process.internal.JvmOptions
+import org.gradle.testing.jacoco.plugins.JacocoPlugin
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
 import java.nio.charset.StandardCharsets
@@ -105,6 +107,13 @@ class JavaLibPlugin implements Plugin<Project> {
             applyAutoModuleName(project, extension)
             addInstallTask(project) {
                 project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
+            }
+            // by default jacoco xml report is disabled, but its required for coverage services
+            project.plugins.withType(JacocoPlugin) {
+                JacocoReport task = project.tasks.findByName('jacocoTestReport') as JacocoReport
+                if (task) {
+                    task.reports.xml.enabled = true
+                }
             }
         }
 
