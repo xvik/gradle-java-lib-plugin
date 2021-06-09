@@ -209,6 +209,7 @@ class JavaLibPlugin implements Plugin<Project> {
             it.with {
                 dependsOn project.tasks.named('classes')
                 group = BUILD_GROUP
+                description = 'Assembles a jar archive containing the main sources'
                 from project.sourceSets.main.allSource
                 archiveClassifier.set('sources')
             }
@@ -227,6 +228,7 @@ class JavaLibPlugin implements Plugin<Project> {
                 it.with {
                     dependsOn project.tasks.javadoc
                     group = BUILD_GROUP
+                    description = 'Assembles a javadoc jar'
                     archiveClassifier.set('javadoc')
                     // configuration is delayed so it is ok to reference task instance here
                     from project.tasks.javadoc.destinationDir
@@ -249,6 +251,7 @@ class JavaLibPlugin implements Plugin<Project> {
                     it.with {
                         dependsOn project.tasks.groovydoc
                         group = BUILD_GROUP
+                        description = 'Assembles a groovydoc jar'
                         // very important to have at least one javadoc package, because otherwise maven cantral
                         // would not accept package
                         archiveClassifier.set(project.tasks.findByName(JAVADOC_JAR) ? 'groovydoc' : 'javadoc')
@@ -296,7 +299,7 @@ class JavaLibPlugin implements Plugin<Project> {
             it.with {
                 dependsOn 'publishToMavenLocal'
                 group = 'publishing'
-                description = 'Alias for publishToMavenLocal task'
+                description = 'Publish to local maven repository (alias for publishToMavenLocal)'
                 doLast last
             }
         }
@@ -340,7 +343,7 @@ class JavaLibPlugin implements Plugin<Project> {
         project.tasks.register('openDependencyReport').configure {
             (it as DefaultTask).with {
                 group = 'help'
-                dependsOn = ['htmlDependencyReport']
+                dependsOn 'htmlDependencyReport'
                 description = 'Opens gradle htmlDependencyReport in browser'
                 // prevent calling task on all subprojects
                 impliesSubProjects = true
