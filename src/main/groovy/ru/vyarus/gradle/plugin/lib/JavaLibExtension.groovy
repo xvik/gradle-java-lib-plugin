@@ -16,13 +16,15 @@ import ru.vyarus.gradle.plugin.pom.PomExtension
 class JavaLibExtension {
 
     private final Project project
+    private final PomExtension pom;
 
     JavaLibExtension(Project project) {
         this.project = project
+        this.pom = project.extensions.findByType(PomExtension)
     }
 /**
-     * Java-platform plugin related configurations.
-     */
+ * Java-platform plugin related configurations.
+ */
     JavaPlatform bom = new JavaPlatform()
 
     /**
@@ -89,11 +91,21 @@ class JavaLibExtension {
     // shortcuts for pom plugin configuration under javaLib.pom closure instead of pomGeneration
     // (unification shortcuts)
     void pom(Closure<?> config) {
-        project.configure(project.extensions.findByType(PomExtension), config)
+        project.configure(pom, config)
     }
 
     void pom(Action<PomExtension> config) {
-        config.execute(project.extensions.findByType(PomExtension))
+        config.execute(pom)
+    }
+
+    /**
+     * Shortcut for pom plugin configuration extension access. Required for cases like:
+     * {@code javaLib.pom.forceVersions( )}
+     *
+     * @return pom plugin configuration extension
+     */
+    PomExtension getPom() {
+        return pom
     }
 
     /**
