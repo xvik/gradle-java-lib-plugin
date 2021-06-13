@@ -61,7 +61,7 @@ import java.nio.charset.StandardCharsets
  * changed accordingly. Also, {@code libJava.bom.description} may be used to specify custom description instead
  * of root project description.
  * <p>
- * Also, in the root project reports aggregation might be enabled with {@code javaLib.aggregateSubprojectReports()}.
+ * Also, in the root project reports aggregation might be enabled with {@code javaLib.aggregateReports()}.
  * When enabled aggregates test reports, coverage report (jacoco plugin) and dependency report (project-report plugin).
  * <p>
  * In case of gradle plugin (java-gradle-plugin + plugin-publish) "pluginMaven" publication will be created for
@@ -402,11 +402,11 @@ class JavaLibPlugin implements Plugin<Project> {
             }
             // makes no sense otherwise
             if (project.subprojects.empty) {
-                throw new GradleException('javaLib.aggregateSubprojectReports() could not be used on project ' +
+                throw new GradleException('javaLib.aggregateReports() could not be used on project ' +
                         "'$project.name' because does not contain subprojects")
             }
             if (project.plugins.hasPlugin(JavaPlugin)) {
-                throw new GradleException('javaLib.aggregateSubprojectReports() could not be used on project ' +
+                throw new GradleException('javaLib.aggregateReports() could not be used on project ' +
                         "'$project.name' because it contains java sources. If this is a root project use 'base' " +
                         'plugin instead.')
             }

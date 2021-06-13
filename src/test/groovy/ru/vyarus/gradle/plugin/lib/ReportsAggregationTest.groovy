@@ -29,7 +29,7 @@ class ReportsAggregationTest extends AbstractTest {
             apply plugin: 'ru.vyarus.java-lib'
 
             javaLib {
-                aggregateSubprojectReports()
+                aggregateReports()
             }
         }
                 .child('sub1') {
@@ -77,7 +77,7 @@ class ReportsAggregationTest extends AbstractTest {
             apply plugin: 'ru.vyarus.java-lib'
 
             javaLib {
-                aggregateSubprojectReports()
+                aggregateReports()
             }
         }
                 .child('sub1')
@@ -114,13 +114,13 @@ class ReportsAggregationTest extends AbstractTest {
             apply plugin: "ru.vyarus.java-lib"
 
             javaLib {
-                aggregateSubprojectReports()
+                aggregateReports()
             }
         }
 
         then: "xml report active"
         def ex = thrown(GradleException)
-        ex.cause.message == 'javaLib.aggregateSubprojectReports() could not be used on project \'test\' because does not contain subprojects'
+        ex.cause.message == 'javaLib.aggregateReports() could not be used on project \'test\' because does not contain subprojects'
     }
 
     def "Check aggregation on java module"() {
@@ -133,7 +133,7 @@ class ReportsAggregationTest extends AbstractTest {
             apply plugin: "ru.vyarus.java-lib"
 
             javaLib {
-                aggregateSubprojectReports()
+                aggregateReports()
             }
         }.child('sub') {
             apply plugin: 'java'
@@ -142,6 +142,6 @@ class ReportsAggregationTest extends AbstractTest {
 
         then: "xml report active"
         def ex = thrown(GradleException)
-        ex.cause.message == 'javaLib.aggregateSubprojectReports() could not be used on project \'test\' because it contains java sources. If this is a root project use \'base\' plugin instead.'
+        ex.cause.message == 'javaLib.aggregateReports() could not be used on project \'test\' because it contains java sources. If this is a root project use \'base\' plugin instead.'
     }
 }

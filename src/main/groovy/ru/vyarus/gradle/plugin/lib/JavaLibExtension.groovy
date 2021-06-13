@@ -89,7 +89,7 @@ class JavaLibExtension {
      * <p>
      * Dependencies html report grouping activated if report-plugin is applied.
      */
-    void aggregateSubprojectReports() {
+    void aggregateReports() {
         aggregatedReports = true
     }
 

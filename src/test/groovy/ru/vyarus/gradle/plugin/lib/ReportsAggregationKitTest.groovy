@@ -19,7 +19,7 @@ class ReportsAggregationKitTest extends AbstractKitTest {
             }
                 
             javaLib {
-                aggregateSubprojectReports()
+                aggregateReports()
             }
             
             allprojects {
