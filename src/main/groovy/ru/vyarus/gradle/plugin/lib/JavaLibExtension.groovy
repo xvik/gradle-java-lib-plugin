@@ -42,6 +42,7 @@ class JavaLibExtension {
     boolean addJavadoc = true
     boolean addSources = true
     boolean signSnapshots = false
+    boolean aggregatedReports = false
 
     /**
      * Disable gradle metadata publishing. Metadata files contains additional gradle dependencies semantic which
@@ -74,6 +75,22 @@ class JavaLibExtension {
      */
     void enableSnapshotsSigning() {
         signSnapshots = true
+    }
+
+    /**
+     * Aggregate test, jacoco coverage and dependency reports for subprojects (assuming 1 level hierarchy).
+     * This option will work with "base" plugin (often used in root project to allow grouping).
+     * <p>
+     * IMPORTANT: must be used in the root project or any subproject containing other subprojects.
+     * <p>
+     * For jacoco reports aggregation jacoco plugin must be active. Jacoco report aggregation is important for
+     * coverage services integration (they require single aggregated report; when aggregation enabled, report
+     * path would be the same as with single module: build/reports/jacoco/test/jacocoTestReport.xml)
+     * <p>
+     * Dependencies html report grouping activated if report-plugin is applied.
+     */
+    void aggregateSubprojectReports() {
+        aggregatedReports = true
     }
 
     // -----------------------------------  Utility methods required for sub objects configuration

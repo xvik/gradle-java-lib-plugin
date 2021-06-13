@@ -14,6 +14,8 @@
     - enableSnapshotsSigning() - enables signing for snapshot versions (disabled by default)
     - pom - shortcut for pom plugin configuration (to use instead of pomGeneration)
     - autoModuleName - shortcut for defining Automatic-Module-Name manifest property
+    - aggregateSubprojectReports() - supposed to be used in the root project to aggregate
+       test reports and jacoco coverage (applied with "base" plugin, adds test and jacocoTestReport tasks)
     
 
 ### 2.1.0 (2020-01-19)

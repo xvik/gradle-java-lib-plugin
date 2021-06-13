@@ -3,12 +3,14 @@ package ru.vyarus.gradle.plugin.lib
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.PublishArtifact
 import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.java.archives.Attributes
+import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlatformPlugin
 import org.gradle.api.plugins.JavaPlugin
@@ -23,10 +25,12 @@ import org.gradle.api.tasks.compile.GroovyCompile
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.TestReport
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningPlugin
 import org.gradle.process.internal.JvmOptions
 import org.gradle.testing.jacoco.plugins.JacocoPlugin
+import org.gradle.testing.jacoco.tasks.JacocoMerge
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
@@ -57,6 +61,9 @@ import java.nio.charset.StandardCharsets
  * changed accordingly. Also, {@code libJava.bom.description} may be used to specify custom description instead
  * of root project description.
  * <p>
+ * Also, in the root project reports aggregation might be enabled with {@code javaLib.aggregateSubprojectReports()}.
+ * When enabled aggregates test reports, coverage report (jacoco plugin) and dependency report (project-report plugin).
+ * <p>
  * In case of gradle plugin (java-gradle-plugin + plugin-publish) "pluginMaven" publication will be created for
  * plugins portal publication, but java-lib plugin will still use "maven" publication (for jcenter and maven central
  * publications). Plugin-publish also creates it's own javadoc and sources tasks, so manually registering
@@ -80,7 +87,8 @@ class JavaLibPlugin implements Plugin<Project> {
         // partial activation for java-platform plugin (when root module is a BOM)
         project.plugins.withType(JavaPlatformPlugin) {
             project.plugins.apply(PomPlugin)
-            JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension, project)
+            JavaLibExtension extension = createExtensionIfRequired(project)
+
             // different name used for publication
             MavenPublication bom = configureBomPublication(project)
             configurePlatform(project, extension, bom)
@@ -94,7 +102,7 @@ class JavaLibPlugin implements Plugin<Project> {
         // full activation when java plugin is enabled
         project.plugins.withType(JavaPlugin) {
             project.plugins.apply(PomPlugin)
-            JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension, project)
+            JavaLibExtension extension = createExtensionIfRequired(project)
             // assume gradle 5.0 and above - stable publishing enabled
             MavenPublication publication = configureMavenPublication(project)
             configureEncoding(project)
@@ -105,22 +113,28 @@ class JavaLibPlugin implements Plugin<Project> {
             configureGradleMetadata(project, extension)
             configureSigning(project, extension, publication)
             applyAutoModuleName(project, extension)
+            enableJacocoXmlReport(project)
             addInstallTask(project) {
                 project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
             }
-            // by default jacoco xml report is disabled, but its required for coverage services
-            project.plugins.withType(JacocoPlugin) {
-                JacocoReport task = project.tasks.findByName('jacocoTestReport') as JacocoReport
-                if (task) {
-                    task.reports.xml.enabled = true
-                }
-            }
+        }
+
+        // extension applied with base plugin because it's often used in the root project for grouping
+        project.plugins.withType(BasePlugin) {
+            JavaLibExtension extension = createExtensionIfRequired(project)
+            aggregateReports(project, extension)
         }
 
         // helper task to open dependency report in browser
-        project.plugins.withType(ProjectReportsPlugin) {
-            addDependenciesTreeTask(project)
+        addOpenDependencyReportTask(project)
+    }
+
+    private JavaLibExtension createExtensionIfRequired(Project project) {
+        JavaLibExtension extension = project.extensions.findByType(JavaLibExtension)
+        if (extension == null) {
+            extension = project.extensions.create('javaLib', JavaLibExtension, project)
         }
+        return extension
     }
 
     private void configurePlatform(Project project, JavaLibExtension extension, MavenPublication bom) {
@@ -348,22 +362,106 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
-    private void addDependenciesTreeTask(Project project) {
-        project.tasks.register('openDependencyReport').configure {
-            (it as DefaultTask).with {
-                group = 'help'
-                dependsOn 'htmlDependencyReport'
-                description = 'Opens gradle htmlDependencyReport in browser'
-                // prevent calling task on all subprojects
-                impliesSubProjects = true
-                doLast {
-                    File report = project.file("build/reports/project/dependencies/root.${project.name}.html")
-                    if (!report.exists()) {
-                        // for multi-module project root, if reports aggregation enabled name would be different
-                        report = project.file('build/reports/project/dependencies/root.html')
+    private void addOpenDependencyReportTask(Project project) {
+        project.plugins.withType(ProjectReportsPlugin) {
+            project.tasks.register('openDependencyReport').configure {
+                (it as DefaultTask).with {
+                    group = 'help'
+                    dependsOn 'htmlDependencyReport'
+                    description = 'Opens gradle htmlDependencyReport in browser'
+                    // prevent calling task on all subprojects
+                    impliesSubProjects = true
+                    doLast {
+                        File report = project.file("build/reports/project/dependencies/root.${project.name}.html")
+                        if (!report.exists()) {
+                            // for multi-module project root, if reports aggregation enabled name would be different
+                            report = project.file('build/reports/project/dependencies/root.html')
+                        }
+                        java.awt.Desktop.desktop.open(report)
                     }
-                    java.awt.Desktop.desktop.open(report)
                 }
+            }
+        }
+    }
+
+    private void enableJacocoXmlReport(Project project) {
+        // by default jacoco xml report is disabled, but its required for coverage services
+        project.plugins.withType(JacocoPlugin) {
+            JacocoReport task = project.tasks.findByName('jacocoTestReport') as JacocoReport
+            if (task) {
+                task.reports.xml.enabled = true
+            }
+        }
+    }
+
+    @SuppressWarnings(['AbcMetric', 'MethodSize'])
+    private void aggregateReports(Project project, JavaLibExtension extension) {
+        project.afterEvaluate {
+            if (!extension.aggregatedReports) {
+                return
+            }
+            // makes no sense otherwise
+            if (project.subprojects.empty) {
+                throw new GradleException('javaLib.aggregateSubprojectReports() could not be used on project ' +
+                        "'$project.name' because does not contain subprojects")
+            }
+            if (project.plugins.hasPlugin(JavaPlugin)) {
+                throw new GradleException('javaLib.aggregateSubprojectReports() could not be used on project ' +
+                        "'$project.name' because it contains java sources. If this is a root project use 'base' " +
+                        'plugin instead.')
+            }
+
+            // aggregate test reports from subprojects
+            project.tasks.register('test', TestReport) {
+                it.with {
+                    description = 'Generates aggregated test report'
+                    // show task in common place
+                    group = 'verification'
+                    destinationDir = project.file("${project.buildDir}/reports/tests/test")
+                    reportOn project.subprojects
+                            .findAll { it.plugins.hasPlugin(JavaPlugin) }.test
+                }
+            }
+
+            // aggregate jacoco coverage from subprojects
+            project.plugins.withType(JacocoPlugin) {
+                Set<Project> projectsWithCoverage = project.subprojects
+                        .findAll { it.plugins.hasPlugin(JacocoPlugin) }
+                TaskProvider jacocoMerge = project.tasks.register('jacocoMerge', JacocoMerge) {
+                    it.with {
+                        // test report would trigger all tests in subprojects
+                        dependsOn('test')
+                        // no group specified because it's a helper task not intended to be called directly
+                        description = 'Merge jacoco coverage results for aggregated report generation'
+                        // use same name as in modules for unification
+                        destinationFile = project.file("${project.buildDir}/jacoco/test.exec")
+                        executionData = project.files(projectsWithCoverage
+                                .collect { it.file("${it.buildDir}/jacoco/test.exec") })
+                    }
+                }
+
+                project.tasks.register('jacocoTestReport', JacocoReport) {
+                    it.with {
+                        description = 'Generates aggregated jacoco coverage report'
+                        dependsOn jacocoMerge
+                        // show task in common place
+                        group = 'verification'
+                        executionData jacocoMerge.get().destinationFile
+                        sourceDirectories.from = project.files(projectsWithCoverage.sourceSets.main.allSource.srcDirs)
+                        classDirectories.from = project.files(projectsWithCoverage.sourceSets.main.output)
+                        // use same location as in single-module case
+                        reports.xml.outputLocation = project
+                                .file("$project.buildDir/reports/jacoco/test/jacocoTestReport.xml")
+                        reports.xml.enabled = true
+                        reports.html.outputLocation = project
+                                .file("$project.buildDir/reports/jacoco/test/html/")
+                    }
+                }
+            }
+
+            // aggregated html dependency report
+            project.plugins.withType(ProjectReportsPlugin) {
+                project.htmlDependencyReport.projects = project.allprojects
             }
         }
     }
