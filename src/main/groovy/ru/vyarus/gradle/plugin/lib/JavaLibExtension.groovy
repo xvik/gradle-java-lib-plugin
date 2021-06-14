@@ -16,12 +16,9 @@ import ru.vyarus.gradle.plugin.pom.PomExtension
 class JavaLibExtension {
 
     private final Project project
-    // property not exposed directly to prevent accidental override
-    private final PomExtension pom
 
     JavaLibExtension(Project project) {
         this.project = project
-        this.pom = project.extensions.findByType(PomExtension)
     }
 
     /**
@@ -138,6 +135,10 @@ class JavaLibExtension {
      * @return pom plugin configuration extension
      */
     PomExtension getPom() {
+        PomExtension pom = project.extensions.findByType(PomExtension)
+        if (pom == null) {
+            throw new IllegalStateException("No pom plugin extension found in project '$project.name'")
+        }
         return pom
     }
 
