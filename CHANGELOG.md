@@ -1,22 +1,28 @@
 * Updated pom plugin (2.2.0): java-platform compatibility
 * Add java-platform plugin support (assuming declared platform published as BOM):
-    register pom plugin, configure 'bom' publication, add install task
+    - activates platform dependencies (javaPlatform.allowDependencies())
+    - register pom plugin 
+    - add install task
+    - registers "bom" publication (intentionally different name)
+    - configures signing if signing plugin enabled
+    - allows overriding default artifact name with javaLib.bom  configuration 
+      (by default it's a root project name)
 * Add automatic signing configuration when 'signing' plugin applied
-  (snapshots not signed - only release versions)
+  (by default, snapshots not signed - only release versions)
 * Add openDependencyReport task when project-report plugin enabled
   (task opens htmlDependencyReport directly in the browser)
 * Enable jacoco xml report by default (required for coverage services)  
 * Add `javaLib` configuration closure:
     - disableGradleMetadata() - disables gradle metadata publishing
     - java-platform plugin related configurations (bom sub-closure):
-        * bom.artifactId and bom.description - corrects bom pom when platform declared in the root project
-    - disableJavadocPublish() and disableSourcesPublish() - disable javadoc and sources publish, enabled by default
+        * bom.artifactId and bom.description - corrects bom artifact name when platform declared in the root project
+    - disableJavadocPublish() and disableSourcesPublish() - disable javadoc and sources publish
     - enableSnapshotsSigning() - enables signing for snapshot versions (disabled by default)
     - pom - shortcut for pom plugin configuration (to use instead of pomGeneration)
     - autoModuleName - shortcut for defining Automatic-Module-Name manifest property
     - aggregateReports() - supposed to be used in the root project to aggregate
        test reports and jacoco coverage (applied with "base" plugin, adds test and jacocoTestReport tasks)
-    
+       Also, aggregates dependency report id project-report plugin enabled
 
 ### 2.1.0 (2020-01-19)
 * Updated pom plugin (2.1.0): 
