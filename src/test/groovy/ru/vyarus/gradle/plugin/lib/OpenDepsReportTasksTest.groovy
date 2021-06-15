@@ -6,7 +6,7 @@ import org.gradle.api.Project
  * @author Vyacheslav Rusakov
  * @since 10.06.2021
  */
-class ReportTasksTest extends AbstractTest {
+class OpenDepsReportTasksTest extends AbstractTest {
 
     def "Check show dependencies task appear"() {
 

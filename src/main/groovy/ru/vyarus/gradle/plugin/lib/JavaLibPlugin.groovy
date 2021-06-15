@@ -26,7 +26,6 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestReport
-import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningPlugin
 import org.gradle.process.internal.JvmOptions
 import org.gradle.testing.jacoco.plugins.JacocoPlugin
@@ -93,7 +92,7 @@ class JavaLibPlugin implements Plugin<Project> {
             MavenPublication bom = configureBomPublication(project)
             configurePlatform(project, extension, bom)
             configureGradleMetadata(project, extension)
-            configureSigning(project, extension, bom)
+            configureSigning(project, bom)
             addInstallTask(project) {
                 project.logger.warn "INSTALLED $project.group:$bom.artifactId:$project.version"
             }
@@ -111,7 +110,7 @@ class JavaLibPlugin implements Plugin<Project> {
             addJavadocJarTask(project, publication, extension)
             addGroovydocJarTask(project, publication, extension)
             configureGradleMetadata(project, extension)
-            configureSigning(project, extension, publication)
+            configureSigning(project, publication)
             applyAutoModuleName(project, extension)
             enableJacocoXmlReport(project)
             addInstallTask(project) {
@@ -339,15 +338,11 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
-    private void configureSigning(Project project, JavaLibExtension extension, MavenPublication publication) {
+    private void configureSigning(Project project, MavenPublication publication) {
         project.plugins.withType(SigningPlugin) {
             // https://docs.gradle.org/current/userguide/signing_plugin.html#sec:signatory_credentials
             project.signing.sign publication
-
-            // snapshots not signed to simplify project usage (no need for cert during local dev)
-            project.tasks.withType(Sign).configureEach {
-                it.onlyIf { extension.signSnapshots || !project.version.toString().endsWith('SNAPSHOT') }
-            }
+            project.signing.required = { !project.version.toString().endsWith('SNAPSHOT') }
         }
     }
 

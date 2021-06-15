@@ -183,7 +183,7 @@ rootProject.name = "test"
                 ["${baseName}.jar", "${baseName}.pom", 'maven-metadata-local.xml'] as Set<String>
     }
 
-    def "Check snapshots signing enabled"() {
+    def "Check snapshots signed if cert configured"() {
         setup:
         file('src/main/java').mkdirs()
         build """
@@ -197,7 +197,6 @@ rootProject.name = "test"
                 disableGradleMetadata()
                 disableJavadocPublish()
                 disableSourcesPublish()
-                enableSnapshotsSigning()
             }
 
             group 'ru.vyarus'

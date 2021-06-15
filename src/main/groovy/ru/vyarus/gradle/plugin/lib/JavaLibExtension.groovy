@@ -38,7 +38,6 @@ class JavaLibExtension {
     boolean gradleMetadata = true
     boolean addJavadoc = true
     boolean addSources = true
-    boolean signSnapshots = false
     boolean aggregatedReports = false
 
     /**
@@ -64,14 +63,6 @@ class JavaLibExtension {
      */
     void disableSourcesPublish() {
         addSources = false
-    }
-
-    /**
-     * Enables artifacts signing for snapshots (disabled by default). By default, signing for snapshot versions
-     * disabled to simplify builds (no additional certificates configuration required to build project).
-     */
-    void enableSnapshotsSigning() {
-        signSnapshots = true
     }
 
     /**
