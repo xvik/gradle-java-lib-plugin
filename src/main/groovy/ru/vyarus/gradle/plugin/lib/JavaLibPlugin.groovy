@@ -12,7 +12,6 @@ import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact
 import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.GroovyPlugin
-import org.gradle.api.plugins.JavaPlatformPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.ProjectReportsPlugin
 import org.gradle.api.publish.PublishingExtension
@@ -84,7 +83,8 @@ class JavaLibPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         // partial activation for java-platform plugin (when root module is a BOM)
-        project.plugins.withType(JavaPlatformPlugin) {
+        // not by type because plugin was added in gradle 5.2
+        project.plugins.withId('java-platform') {
             project.plugins.apply(PomPlugin)
             JavaLibExtension extension = createExtensionIfRequired(project)
 
@@ -445,10 +445,10 @@ class JavaLibPlugin implements Plugin<Project> {
                         sourceDirectories.from = project.files(projectsWithCoverage.sourceSets.main.allSource.srcDirs)
                         classDirectories.from = project.files(projectsWithCoverage.sourceSets.main.output)
                         // use same location as in single-module case
-                        reports.xml.outputLocation = project
+                        reports.xml.destination = project
                                 .file("$project.buildDir/reports/jacoco/test/jacocoTestReport.xml")
                         reports.xml.enabled = true
-                        reports.html.outputLocation = project
+                        reports.html.destination = project
                                 .file("$project.buildDir/reports/jacoco/test/html/")
                     }
                 }
