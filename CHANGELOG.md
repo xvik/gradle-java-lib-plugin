@@ -12,15 +12,16 @@
 * Add openDependencyReport task when project-report plugin enabled
   (task opens htmlDependencyReport directly in the browser)
 * Enable jacoco xml report by default (required for coverage services)  
+* Multi-module projects support: test and coverage reports aggregation
+  (at least "base" plugin must be applied to trigger minimal java-lib plugin activation )
 * Add `javaLib` configuration closure:
-    - disableGradleMetadata() - disables gradle metadata publishing
-    - java-platform plugin related configurations (bom sub-closure):
-        * bom.artifactId and bom.description - corrects bom artifact name when platform declared in the root project
-    - disableJavadocPublish() and disableSourcesPublish() - disable javadoc and sources publish
-    - pom - shortcut for pom plugin configuration (to use instead of pomGeneration)
+    - withoutGradleMetadata() - disables gradle metadata publishing
+    - withoutJavadoc() and withoutSources() - disable javadoc and sources publish
+    - bom.artifactId and bom.description properties - updates artifact declared with java-platform
+    - pom - shortcut for the new pom plugin configuration closure (to use instead of pomGeneration)
     - autoModuleName - shortcut for defining Automatic-Module-Name manifest property
     - aggregateReports() - supposed to be used in the root project to aggregate
-       test reports and jacoco coverage (applied with "base" plugin, adds test and jacocoTestReport tasks)
+       test reports and jacoco coverage (adds test and jacocoTestReport tasks)
        Also, aggregates dependency report id project-report plugin enabled
 
 ### 2.1.0 (2020-01-19)

@@ -40,7 +40,7 @@ import java.nio.charset.StandardCharsets
  *     <li> Fills manifest for main jar, add pom and generated pom.properties inside jar (as maven do)
  *     <li> Add sourcesJar task
  *     <li> Add javadocJar or (and) groovydocJar tasks
- *     <li> Configures maven publication named 'maven' with all jars (jar, sources, javadock and maybe groovydoc)
+ *     <li> Configures maven publication named 'maven' with all jars (jar, sources, javadoc and maybe groovydoc)
  *     <li> Applies 'ru.vyarus.pom' plugin which fixes pom dependencies, adds 'pom' closure fot simpler pom
  *     configuration
  *     <li> Add 'install' task as shortcut for publishToMavenLocal
@@ -63,8 +63,8 @@ import java.nio.charset.StandardCharsets
  * When enabled aggregates test reports, coverage report (jacoco plugin) and dependency report (project-report plugin).
  * <p>
  * In case of gradle plugin (java-gradle-plugin + plugin-publish) "pluginMaven" publication will be created for
- * plugins portal publication, but java-lib plugin will still use "maven" publication (for jcenter and maven central
- * publications). Plugin-publish also creates it's own javadoc and sources tasks, so manually registering
+ * plugins portal publication, but java-lib plugin will still use "maven" publication (for maven central
+ * publication). Plugin-publish also creates it's own javadoc and sources tasks, so manually registering
  * artifacts (only) to prevent this.
  * Overall, in case of gradle plugin, 2 maven publications should be used, but exactly the same artifacts would
  * be published everywhere (plugin portal will additionally receive alias publications).

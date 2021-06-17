@@ -49,8 +49,8 @@ class JavaLibPluginKitTest extends AbstractKitTest {
             }
             
             javaLib {
-                disableJavadocPublish()
-                disableSourcesPublish()
+                withoutJavadoc()
+                withoutSources()
             }
 
             group 'ru.vyarus'

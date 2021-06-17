@@ -19,9 +19,9 @@ class SigningKitTest extends AbstractKitTest {
             }
             
             javaLib {
-                disableGradleMetadata()
-                disableJavadocPublish()
-                disableSourcesPublish()
+                withoutGradleMetadata()
+                withoutJavadoc()
+                withoutSources()
             }
 
             group 'ru.vyarus'
@@ -65,7 +65,7 @@ rootProject.name = "test"
             }
             
             javaLib {
-                disableGradleMetadata()
+                withoutGradleMetadata()
             }
 
             group 'ru.vyarus'
@@ -153,9 +153,9 @@ rootProject.name = "test"
             }
             
             javaLib {
-                disableGradleMetadata()
-                disableJavadocPublish()
-                disableSourcesPublish()
+                withoutGradleMetadata()
+                withoutJavadoc()
+                withoutSources()
             }
 
             group 'ru.vyarus'
@@ -194,9 +194,9 @@ rootProject.name = "test"
             }
             
             javaLib {
-                disableGradleMetadata()
-                disableJavadocPublish()
-                disableSourcesPublish()
+                withoutGradleMetadata()
+                withoutJavadoc()
+                withoutSources()
             }
 
             group 'ru.vyarus'

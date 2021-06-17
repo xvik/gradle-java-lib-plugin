@@ -45,7 +45,7 @@ class JavaLibExtension {
      * is impossible to express in pom file. In majority of cases this file is not required and may be excluded
      * to avoid publishing additional artifact (besides, some repos might complain about it).
      */
-    void disableGradleMetadata() {
+    void withoutGradleMetadata() {
         gradleMetadata = false
     }
 
@@ -53,7 +53,7 @@ class JavaLibExtension {
      * Disable javadoc (groovydoc) publication.
      * Ignored with java-publish plugin.
      */
-    void disableJavadocPublish() {
+    void withoutJavadoc() {
         addJavadoc = false
     }
 
@@ -61,7 +61,7 @@ class JavaLibExtension {
      * Disable sources publication.
      * Ignored with java-publish plugin.
      */
-    void disableSourcesPublish() {
+    void withoutSources() {
         addSources = false
     }
 

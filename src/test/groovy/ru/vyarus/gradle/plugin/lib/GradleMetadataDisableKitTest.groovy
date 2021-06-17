@@ -25,7 +25,7 @@ class GradleMetadataDisableKitTest extends AbstractKitTest {
             }
             
             javaLib {
-                disableGradleMetadata()
+                withoutGradleMetadata()
             }
         """
 
@@ -65,7 +65,7 @@ class GradleMetadataDisableKitTest extends AbstractKitTest {
             }
             
             javaLib {
-                disableGradleMetadata()
+                withoutGradleMetadata()
             }
         """
 
