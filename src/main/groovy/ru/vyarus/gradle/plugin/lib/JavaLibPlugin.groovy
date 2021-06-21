@@ -43,6 +43,7 @@ import java.nio.charset.StandardCharsets
  *     <li> Configures maven publication named 'maven' with all jars (jar, sources, javadoc and maybe groovydoc)
  *     <li> Applies 'ru.vyarus.pom' plugin which fixes pom dependencies, adds 'pom' closure fot simpler pom
  *     configuration
+ *     <li> Configure signing if "signing" plugin applied
  *     <li> Add 'install' task as shortcut for publishToMavenLocal
  * </ul>
  * <p>
@@ -50,6 +51,7 @@ import java.nio.charset.StandardCharsets
  * <ul>
  *     <li> Applies 'ru.vyarus.pom' plugin
  *     <li> Configure `bom` maven publication
+ *     <li> Configure signing if "signing" plugin applied
  *     <li> Add 'install' task as shortcut for publishToMavenLocal
  *     <li> Activates platform dependencies (javaPlatform.allowDependencies())
  * </ul>
@@ -61,6 +63,7 @@ import java.nio.charset.StandardCharsets
  * <p>
  * Also, in the root project reports aggregation might be enabled with {@code javaLib.aggregateReports()}.
  * When enabled aggregates test reports, coverage report (jacoco plugin) and dependency report (project-report plugin).
+ * Aggregation might be used with at least "base" plugin (but may be also with java-platform).
  * <p>
  * In case of gradle plugin (java-gradle-plugin + plugin-publish) "pluginMaven" publication will be created for
  * plugins portal publication, but java-lib plugin will still use "maven" publication (for maven central
@@ -71,6 +74,7 @@ import java.nio.charset.StandardCharsets
  *
  * @author Vyacheslav Rusakov
  * @since 07.11.2015
+ * @see JavaLibExtension for options (javaLib closure in gradle)
  */
 @SuppressWarnings('DuplicateStringLiteral')
 @CompileStatic(TypeCheckingMode.SKIP)

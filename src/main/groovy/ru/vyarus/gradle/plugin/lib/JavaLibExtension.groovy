@@ -6,7 +6,7 @@ import org.gradle.api.Project
 import ru.vyarus.gradle.plugin.pom.PomExtension
 
 /**
- * Java-lib plugin extension for fine-tuning. Accessible as `javaLib` closure.
+ * Java-lib plugin extension. Accessible as `javaLib` closure.
  *
  * @author Vyacheslav Rusakov
  * @since 06.06.2021
@@ -27,8 +27,8 @@ class JavaLibExtension {
     JavaPlatform bom = new JavaPlatform()
 
     /**
-     * Automatic-Module-Name meta-inf property value (java 11 modules).
-     * Object used for type to allow lazy-evaluated GStrings usage.
+     * Automatic-Module-Name meta-inf property value (java 9 modules).
+     * Object used as type to allow lazy-evaluated GStrings.
      */
     Object autoModuleName
 
@@ -70,6 +70,8 @@ class JavaLibExtension {
      * This option will work with "base" plugin (often used in root project to allow grouping).
      * <p>
      * IMPORTANT: must be used in the root project or any subproject containing other subprojects.
+     * <p>
+     * Aggregates only direct subprojects (ignoring lower levels).
      * <p>
      * For jacoco reports aggregation jacoco plugin must be active. Jacoco report aggregation is important for
      * coverage services integration (they require single aggregated report; when aggregation enabled, report
