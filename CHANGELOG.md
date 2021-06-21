@@ -1,3 +1,4 @@
+### 2.2.0 (2021-06-22)
 * Updated pom plugin (2.2.0): java-platform compatibility
 * Add java-platform plugin support (assuming declared platform published as BOM):
     - activates platform dependencies (javaPlatform.allowDependencies())
