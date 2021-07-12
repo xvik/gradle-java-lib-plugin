@@ -82,7 +82,7 @@ Plugin compiled for java 8, compatible with java 11
 
 Gradle | Version
 --------|-------
-5.1     | 2.2.0
+5.1     | 2.2.1
 4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
 older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
 
