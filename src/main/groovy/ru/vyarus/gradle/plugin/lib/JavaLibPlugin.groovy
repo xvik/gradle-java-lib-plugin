@@ -86,12 +86,13 @@ class JavaLibPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        // always creating extension to avoid hard to track mis-references in multi-module projects
+        JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension, project)
+
         // partial activation for java-platform plugin (when root module is a BOM)
         // not by type because plugin was added in gradle 5.2
         project.plugins.withId('java-platform') {
             project.plugins.apply(PomPlugin)
-            JavaLibExtension extension = createExtensionIfRequired(project)
-
             // different name used for publication
             MavenPublication bom = configureBomPublication(project)
             configurePlatform(project, extension, bom)
@@ -105,7 +106,6 @@ class JavaLibPlugin implements Plugin<Project> {
         // full activation when java plugin is enabled
         project.plugins.withType(JavaPlugin) {
             project.plugins.apply(PomPlugin)
-            JavaLibExtension extension = createExtensionIfRequired(project)
             // assume gradle 5.0 and above - stable publishing enabled
             MavenPublication publication = configureMavenPublication(project)
             configureEncoding(project)
@@ -124,20 +124,11 @@ class JavaLibPlugin implements Plugin<Project> {
 
         // extension applied with base plugin because it's often used in the root project for grouping
         project.plugins.withType(BasePlugin) {
-            JavaLibExtension extension = createExtensionIfRequired(project)
             aggregateReports(project, extension)
         }
 
         // helper task to open dependency report in browser
         addOpenDependencyReportTask(project)
-    }
-
-    private JavaLibExtension createExtensionIfRequired(Project project) {
-        JavaLibExtension extension = project.extensions.findByType(JavaLibExtension)
-        if (extension == null) {
-            extension = project.extensions.create('javaLib', JavaLibExtension, project)
-        }
-        return extension
     }
 
     private void configurePlatform(Project project, JavaLibExtension extension, MavenPublication bom) {

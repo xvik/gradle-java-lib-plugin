@@ -84,4 +84,50 @@ class GradleMetadataDisableKitTest extends AbstractKitTest {
         deploy.list().size() == 1
         withoutModuleFile(deploy) == ["${baseName}.pom"] as Set<String>
     }
+
+    def "Check metadata disable in allprojects"() {
+        setup:
+        build """
+            plugins {
+                id 'base'
+                id 'ru.vyarus.java-lib'
+            }
+            
+            allprojects {
+                println '!!!!!!!!'+it.name            
+            
+                apply plugin: 'ru.vyarus.java-lib'
+                
+                group 'ru.vyarus'
+                version 1.0
+                        
+                repositories { mavenCentral() }
+                
+                javaLib.withoutGradleMetadata()
+            }
+            
+            subprojects {
+                apply plugin: 'groovy'             
+            }
+        """
+        file('settings.gradle') << "include 'sub'"
+        file('sub').mkdirs()
+
+        when: "run install task"
+        def result = run('install')
+
+        String artifactId = 'sub'
+        File deploy = file("build/repo/ru/vyarus/$artifactId/1.0/")
+
+        then: "task done"
+        result.task(":sub:install").outcome == TaskOutcome.SUCCESS
+
+        then: "artifacts deployed"
+        deploy.exists()
+        def baseName = artifactId + '-1.0'
+
+        then: "pom does not have metadata comment"
+        def pom = new File(deploy, "${baseName}.pom").text
+        !pom.contains('<!-- This module was also published with a richer model, Gradle metadata,  -->')
+    }
 }

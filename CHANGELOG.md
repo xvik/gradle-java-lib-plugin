@@ -1,3 +1,6 @@
+* Fix multi-module projects configuration with allprojects closure 
+  (configuration extension always created on plugin activation to avoid mis-references)
+
 ### 2.2.0 (2021-06-22)
 * Updated pom plugin (2.2.0): java-platform compatibility
 * Add java-platform plugin support (assuming declared platform published as BOM):
