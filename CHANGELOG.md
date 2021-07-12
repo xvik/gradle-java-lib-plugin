@@ -1,3 +1,4 @@
+### 2.2.1 (2021-07-13)
 * Fix multi-module projects configuration with allprojects closure 
   (configuration extension always created on plugin activation to avoid mis-references)
 

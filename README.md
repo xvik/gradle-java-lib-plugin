@@ -62,7 +62,7 @@ buildscript {
       gradlePluginPortal()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:2.2.0'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:2.2.1'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -72,7 +72,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '2.2.0'
+    id 'ru.vyarus.java-lib' version '2.2.1'
 }
 ```
 
@@ -856,9 +856,7 @@ allprojects {
       //...
     }
 
-    javaLib {
-        disableGradleMetadata()
-    }
+    javaLib.withoutGradleMetadata()
 }
 
 // all sub-modules are normal java modules, using root BOM (like maven)
@@ -882,7 +880,7 @@ subprojects {
 
     javaLib {
         // java 9 auto module name
-        autoModuleName = "sample-module"
+        autoModuleName = "com.sample.module"
         // use only direct dependencies in the generated pom, removing BOM
         pom.removeDependencyManagement()
     }
