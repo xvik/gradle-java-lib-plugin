@@ -38,6 +38,7 @@ class JavaLibExtension {
     boolean gradleMetadata = true
     boolean addJavadoc = true
     boolean addSources = true
+    boolean publication = true
     boolean aggregatedReports = false
 
     /**
@@ -63,6 +64,13 @@ class JavaLibExtension {
      */
     void withoutSources() {
         addSources = false
+    }
+
+    /**
+     * Disable all publications. Might be used to disable configured BOM publication or any sub-module publication.
+     */
+    void withoutPublication() {
+        publication = false
     }
 
     /**

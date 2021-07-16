@@ -97,4 +97,83 @@ class JavaPlatformKitTest extends AbstractKitTest {
         pom.name.text() == 'bom'
         pom.description.text() == 'Sample BOM'
     }
+
+    def "Check avoid local bom publishing"() {
+        setup:
+        file('src/main/java').mkdirs()
+        build """
+            plugins {
+                id 'java-platform'
+                id 'ru.vyarus.java-lib'
+            }
+
+            group 'ru.vyarus'
+            version 1.0
+            
+            javaLib.withoutPublication()
+            
+            dependencies {
+                constraints {
+                    api 'ru.vyarus:guice-validator:2.0.0'
+                }
+            }
+        """
+
+        when: "run install task"
+        def result = run('install')
+
+
+        String artifactId = projectName()
+        File deploy = file("build/repo/ru/vyarus/$artifactId/1.0/")
+
+        then: "task done"
+        result.task(":install").outcome == TaskOutcome.SUCCESS
+        !result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+
+        then: "artifacts not deployed"
+        !deploy.exists()
+    }
+
+    def "Check avoid external repo bom publishing"() {
+        setup:
+        file('src/main/java').mkdirs()
+        build """
+            plugins {
+                id 'java-platform'
+                id 'ru.vyarus.java-lib'
+            }
+
+            group 'ru.vyarus'
+            version 1.0
+            
+            javaLib.withoutPublication()
+            
+            publishing {
+                repositories {
+                    maven {
+                        url = layout.buildDirectory.dir('repo2')
+                    }
+                }
+            }
+            
+            dependencies {
+                constraints {
+                    api 'ru.vyarus:guice-validator:2.0.0'
+                }
+            }
+        """
+
+        when: "run install task"
+        def result = run('publish')
+
+        String artifactId = projectName()
+        File deploy = file("build/repo2/ru/vyarus/$artifactId/1.0/")
+
+        then: "task done"
+        result.task(":publish").outcome == TaskOutcome.UP_TO_DATE
+        !result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+
+        then: "artifacts not deployed"
+        !deploy.exists()
+    }
 }

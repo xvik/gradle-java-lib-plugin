@@ -16,6 +16,8 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.ProjectReportsPlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.publish.tasks.GenerateModuleMetadata
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
@@ -97,8 +99,9 @@ class JavaLibPlugin implements Plugin<Project> {
             MavenPublication bom = configureBomPublication(project)
             configurePlatform(project, extension, bom)
             configureGradleMetadata(project, extension)
+            disablePublication(project, extension)
             configureSigning(project, bom)
-            addInstallTask(project) {
+            addInstallTask(project, extension) {
                 project.logger.warn "INSTALLED $project.group:$bom.artifactId:$project.version"
             }
         }
@@ -114,10 +117,11 @@ class JavaLibPlugin implements Plugin<Project> {
             addJavadocJarTask(project, publication, extension)
             addGroovydocJarTask(project, publication, extension)
             configureGradleMetadata(project, extension)
+            disablePublication(project, extension)
             configureSigning(project, publication)
             applyAutoModuleName(project, extension)
             enableJacocoXmlReport(project)
-            addInstallTask(project) {
+            addInstallTask(project, extension) {
                 project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
             }
         }
@@ -311,13 +315,18 @@ class JavaLibPlugin implements Plugin<Project> {
         return publication
     }
 
-    private void addInstallTask(Project project, Closure last) {
+    private void addInstallTask(Project project, JavaLibExtension extension, Closure last) {
         project.tasks.register('install') {
             it.with {
                 dependsOn 'publishToMavenLocal'
                 group = 'publishing'
                 description = 'Publish to local maven repository (alias for publishToMavenLocal)'
-                doLast last
+                doLast {
+                    // show message only if publication not disabled
+                    if (extension.publication) {
+                        last.call()
+                    }
+                }
             }
         }
     }
@@ -327,6 +336,19 @@ class JavaLibPlugin implements Plugin<Project> {
             // disable gradle metadata publishing (usually it confuse a lot)
             if (!extension.gradleMetadata) {
                 project.tasks.withType(GenerateModuleMetadata).configureEach {
+                    enabled = false
+                }
+            }
+        }
+    }
+
+    private void disablePublication(Project project, JavaLibExtension extension) {
+        project.afterEvaluate {
+            if (!extension.publication) {
+                project.tasks.withType(PublishToMavenRepository).configureEach {
+                    enabled = extension.publication
+                }
+                project.tasks.withType(PublishToMavenLocal).configureEach {
                     enabled = false
                 }
             }
