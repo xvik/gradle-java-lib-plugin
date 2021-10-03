@@ -48,8 +48,8 @@ class ReportsAggregationTest extends AbstractTest {
 
         then: "aggregation tasks created"
         def merge = project.tasks.jacocoMerge
-        merge
-        merge.executionData.size() == 2
+        // execution data counts only existing files
+        merge.executionData.size() == 0
         project.tasks.jacocoTestReport
 
         then: "tests aggregation task"
@@ -91,8 +91,8 @@ class ReportsAggregationTest extends AbstractTest {
 
         then: "aggregation tasks created"
         def merge = project.tasks.jacocoMerge
-        merge
-        merge.executionData.size() == 1
+        // execution data counts only existing files
+        merge.executionData.size() == 0
         project.tasks.jacocoTestReport
 
         then: "tests aggregation task"

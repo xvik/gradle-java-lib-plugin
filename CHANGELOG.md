@@ -1,5 +1,6 @@
 * Add disable publication option: javaLib.withoutPublication() (disables all declared publications)
-  Useful for disabling bom publication in the root project (use platform for deps management only) 
+  Useful for disabling bom publication in the root project (use platform for deps management only)
+* Fix aggregated coverage report for case when not all submodules produce coverage
 
 ### 2.2.1 (2021-07-13)
 * Fix multi-module projects configuration with allprojects closure 

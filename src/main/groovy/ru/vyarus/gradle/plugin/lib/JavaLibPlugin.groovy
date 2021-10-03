@@ -449,6 +449,7 @@ class JavaLibPlugin implements Plugin<Project> {
                         destinationFile = project.file("${project.buildDir}/jacoco/test.exec")
                         executionData = project.files(projectsWithCoverage
                                 .collect { it.file("${it.buildDir}/jacoco/test.exec") })
+                                .filter { it.exists() }
                     }
                 }
 
