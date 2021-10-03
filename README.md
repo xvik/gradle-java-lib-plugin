@@ -62,7 +62,7 @@ buildscript {
       gradlePluginPortal()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:2.2.1'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:2.2.2'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -72,7 +72,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '2.2.1'
+    id 'ru.vyarus.java-lib' version '2.2.2'
 }
 ```
 
@@ -82,7 +82,7 @@ Plugin compiled for java 8, compatible with java 11
 
 Gradle | Version
 --------|-------
-5.1     | 2.2.1
+5.1     | 2.2.2
 4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
 older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
 
@@ -329,6 +329,11 @@ javaLib {
    * Affects all publications (not just registered by plugin).
    */
   withoutGradleMetadata()
+
+  /**
+   * Disable all publications. Might be used to disable configured BOM publication or any sub-module publication.
+   */
+  withoutPublication()
 
   /**
    * Shortcut for Auto-Module-Name meta-inf header declaration
@@ -829,6 +834,9 @@ javaLib {
         artifactId = 'sample-bom'
         description = 'Sample project BOM'
     }
+  
+    // OR disable BOM publication
+    // withoutPublication()
 }
 
 // maven publication related configuration applied to all projects
