@@ -149,6 +149,7 @@ Example projects:
 
 * [Java library](https://github.com/xvik/dropwizard-guicey), published to maven central
 * [Multi-module java library](https://github.com/xvik/dropwizard-guicey-ext) (with BOM), published to maven central
+* [Simple multi-module library](https://github.com/xvik/yaml-updater) (without BOM), published to maven central
 * [This project](https://github.com/xvik/gradle-java-lib-plugin/blob/master/build.gradle) is an example of gradle plugin publication to maven central and plugins portal
 
 
@@ -848,20 +849,24 @@ allprojects {
 
     group = 'com.test'
 
-    pom {
-      licenses {
-        license {
-          name "The MIT License"
-          url "http://www.opensource.org/licenses/MIT"
-          distribution 'repo'
+    // delay required because java plugin is activated only in subprojects and without it
+    // pom closure would reference root project only 
+    afterEvaluate {
+      pom {
+        licenses {
+          license {
+            name "The MIT License"
+            url "http://www.opensource.org/licenses/MIT"
+            distribution 'repo'
+          }
         }
+        scm {
+          url 'https://github.com/me/my-repo.git'
+          connection 'scm:git@github.com:me/my-repo.git'
+          developerConnection 'scm:git@github.com:me/my-repo.git'
+        }
+        //...
       }
-      scm {
-        url 'https://github.com/me/my-repo.git'
-        connection 'scm:git@github.com:me/my-repo.git'
-        developerConnection 'scm:git@github.com:me/my-repo.git'
-      }
-      //...
     }
 
     javaLib.withoutGradleMetadata()
@@ -905,6 +910,9 @@ Sub-projects are java modules which use platform declared in the root project fo
 `groovy` plugin used just as an example (used for spock tests, main sources might be java-only): it could be `java` or `java-library` plugin.
 
 The complete multi-module project example could be generated with [java-library generator](https://github.com/xvik/generator-lib-java).
+
+* [dropwizard-guicey-ext](https://github.com/xvik/dropwizard-guicey-ext) - multi-module project with (published) bom
+* [yaml-updater](https://github.com/xvik/yaml-updater) - simple multi-module without bom (simple case)
 
 ### APPENDIX: boilerplate plugin removes
 
