@@ -10,7 +10,7 @@ import java.util.zip.ZipFile
  */
 class UpstreamKitTest extends AbstractKitTest {
 
-    String GRADLE_VERSION = '7.1'
+    String GRADLE_VERSION = '7.2'
 
     def "Check install task"() {
         setup:
@@ -26,7 +26,7 @@ class UpstreamKitTest extends AbstractKitTest {
         """
 
         when: "run pom task"
-        def result = runVer(GRADLE_VERSION, 'install')
+        def result = runVer(GRADLE_VERSION, 'install', '--warning-mode', 'all')
 
 
         String artifactId = projectName()
@@ -264,7 +264,7 @@ rootProject.name = "test"
         fileFromClasspath('sub2/src/test/groovy/sample/SampleTest2.groovy', '/sample/SampleTest2.groovy')
 
         when: "run test task"
-        def result = runVer(GRADLE_VERSION, 'test')
+        def result = runVer(GRADLE_VERSION, 'test', '--warning-mode', 'all')
 
         then: "task done"
         result.task(":test").outcome == TaskOutcome.SUCCESS
