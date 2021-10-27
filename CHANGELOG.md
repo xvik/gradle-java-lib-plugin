@@ -1,3 +1,5 @@
+* Updated pom plugin (2.2.1): automatic detection of incorrect pom closure usage
+
 ### 2.2.2 (2021-10-03)
 * Add disable publication option: javaLib.withoutPublication() (disables all declared publications)
   Useful for disabling bom publication in the root project (use platform for deps management only)

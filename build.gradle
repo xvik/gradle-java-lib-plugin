@@ -21,7 +21,7 @@ wrapper {
 
 repositories { mavenLocal(); mavenCentral(); gradlePluginPortal() }
 dependencies {
-    implementation 'ru.vyarus:gradle-pom-plugin:2.2.0'
+    implementation 'ru.vyarus:gradle-pom-plugin:2.2.1'
 
     testImplementation('org.spockframework:spock-core:2.0-groovy-2.5') {
         exclude group: 'org.codehaus.groovy'
