@@ -1,4 +1,6 @@
 * Updated pom plugin (2.2.1): automatic detection of incorrect pom closure usage
+* Fix gradle 7 warnings
+* Remove JacocoMerge task (for reports aggregation): JacocoReport merges coverage data directly now
 
 ### 2.2.2 (2021-10-03)
 * Add disable publication option: javaLib.withoutPublication() (disables all declared publications)

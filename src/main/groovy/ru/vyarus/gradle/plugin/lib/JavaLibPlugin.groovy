@@ -19,6 +19,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.publish.tasks.GenerateModuleMetadata
+import org.gradle.api.reporting.Report
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
@@ -30,8 +31,8 @@ import org.gradle.api.tasks.testing.TestReport
 import org.gradle.plugins.signing.SigningPlugin
 import org.gradle.process.internal.JvmOptions
 import org.gradle.testing.jacoco.plugins.JacocoPlugin
-import org.gradle.testing.jacoco.tasks.JacocoMerge
 import org.gradle.testing.jacoco.tasks.JacocoReport
+import org.gradle.util.GradleVersion
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
 import java.nio.charset.StandardCharsets
@@ -401,7 +402,7 @@ class JavaLibPlugin implements Plugin<Project> {
         project.plugins.withType(JacocoPlugin) {
             JacocoReport task = project.tasks.findByName('jacocoTestReport') as JacocoReport
             if (task) {
-                task.reports.xml.enabled = true
+                enableReport(task.reports.xml)
             }
         }
     }
@@ -439,33 +440,22 @@ class JavaLibPlugin implements Plugin<Project> {
             project.plugins.withType(JacocoPlugin) {
                 Set<Project> projectsWithCoverage = project.subprojects
                         .findAll { it.plugins.hasPlugin(JacocoPlugin) }
-                TaskProvider jacocoMerge = project.tasks.register('jacocoMerge', JacocoMerge) {
-                    it.with {
-                        // test report would trigger all tests in subprojects
-                        dependsOn('test')
-                        // no group specified because it's a helper task not intended to be called directly
-                        description = 'Merge jacoco coverage results for aggregated report generation'
-                        // use same name as in modules for unification
-                        destinationFile = project.file("${project.buildDir}/jacoco/test.exec")
-                        executionData = project.files(projectsWithCoverage
-                                .collect { it.file("${it.buildDir}/jacoco/test.exec") })
-                                .filter { it.exists() }
-                    }
-                }
 
                 project.tasks.register('jacocoTestReport', JacocoReport) {
                     it.with {
                         description = 'Generates aggregated jacoco coverage report'
-                        dependsOn jacocoMerge
+                        dependsOn 'test'
                         // show task in common place
                         group = 'verification'
-                        executionData jacocoMerge.get().destinationFile
+                        executionData project.files(projectsWithCoverage
+                                .collect { it.file("${it.buildDir}/jacoco/test.exec") })
+                                .filter { it.exists() }
                         sourceDirectories.from = project.files(projectsWithCoverage.sourceSets.main.allSource.srcDirs)
                         classDirectories.from = project.files(projectsWithCoverage.sourceSets.main.output)
                         // use same location as in single-module case
                         reports.xml.destination = project
                                 .file("$project.buildDir/reports/jacoco/test/jacocoTestReport.xml")
-                        reports.xml.enabled = true
+                        enableReport(reports.xml)
                         reports.html.destination = project
                                 .file("$project.buildDir/reports/jacoco/test/html/")
                     }
@@ -503,4 +493,11 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
+    private void enableReport(Report report) {
+        if (GradleVersion.current() < GradleVersion.version('7.0')) {
+            report.enabled = true
+        } else {
+            report.required.set(true)
+        }
+    }
 }

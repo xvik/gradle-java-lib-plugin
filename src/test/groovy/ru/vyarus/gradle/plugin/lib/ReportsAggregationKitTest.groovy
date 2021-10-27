@@ -64,11 +64,11 @@ class ReportsAggregationKitTest extends AbstractKitTest {
 
         then: "task done"
         result.task(":jacocoTestReport").outcome == TaskOutcome.SUCCESS
-        result.task(":jacocoMerge").outcome == TaskOutcome.SUCCESS
 
         then: "coverage aggregated"
-        file('build/reports/jacoco/test/jacocoTestReport.xml').exists()
-        file('build/jacoco/test.exec').exists()
+        def cov = file('build/reports/jacoco/test/jacocoTestReport.xml')
+        cov.exists()
+        cov.length() > 0
 
         when: "run dependencies task"
         result = run('htmlDependencyReport')

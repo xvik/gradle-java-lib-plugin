@@ -2,6 +2,7 @@ package ru.vyarus.gradle.plugin.lib
 
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.testing.jacoco.tasks.JacocoReport
 
 /**
  * @author Vyacheslav Rusakov
@@ -47,10 +48,9 @@ class ReportsAggregationTest extends AbstractTest {
                 .build()
 
         then: "aggregation tasks created"
-        def merge = project.tasks.jacocoMerge
+        JacocoReport cov = project.tasks.jacocoTestReport
         // execution data counts only existing files
-        merge.executionData.size() == 0
-        project.tasks.jacocoTestReport
+        cov.executionData.size() == 0
 
         then: "tests aggregation task"
         def test = project.tasks.test
@@ -90,10 +90,9 @@ class ReportsAggregationTest extends AbstractTest {
                 .build()
 
         then: "aggregation tasks created"
-        def merge = project.tasks.jacocoMerge
+        JacocoReport cov = project.tasks.jacocoTestReport
         // execution data counts only existing files
-        merge.executionData.size() == 0
-        project.tasks.jacocoTestReport
+        cov.executionData.size() == 0
 
         then: "tests aggregation task"
         def test = project.tasks.test
