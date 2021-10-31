@@ -62,7 +62,7 @@ buildscript {
       gradlePluginPortal()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:2.2.2'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:2.3.0'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -72,7 +72,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '2.2.2'
+    id 'ru.vyarus.java-lib' version '2.3.0'
 }
 ```
 
@@ -82,7 +82,7 @@ Plugin compiled for java 8, compatible with java 11
 
 Gradle | Version
 --------|-------
-5.1     | 2.2.2
+5.1     | 2.3.0
 4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
 older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
 
@@ -1005,7 +1005,7 @@ publishing.publications {
     }
 }
 
-task.jacocoTestReport.xml.enabled = true
+task.jacocoTestReport.xml.required.set(true)
 
 task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
 	logger.warn "INSTALLED $project.group:$project.name:$project.version"
@@ -1033,7 +1033,7 @@ publishing.publications {
   }
 }
 
-jacocoTestReport.reports.xml.enabled = true
+jacocoTestReport.reports.xml.required.set(true)
 
 task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
   logger.warn "INSTALLED $project.group:custom-name:$project.version"
@@ -1050,21 +1050,17 @@ task test (type: TestReport, description: 'Generates aggregated test report') {
 }
 
 def projectsWithCoverage = project.subprojects.findAll { it.plugins.hasPlugin(JacocoPlugin) }
-task jacocoMerge (type: JacocoMerge, description: 'Merge jacoco coverage results for aggregated report generation') {
-    dependsOn('test')
-    destinationFile = project.file("${project.buildDir}/jacoco/test.exec")
-    executionData = project.files(projectsWithCoverage
-            .collect { it.file("${it.buildDir}/jacoco/test.exec") })
-}
 
 task jacocoTestReport (type: JacocoReport, description: 'Generates aggregated jacoco coverage report') {
-    dependsOn jacocoMerge
+    dependsOn 'test'
     group = 'verification'
-    executionData jacocoMerge.destinationFile
+    executionData project.files(projectsWithCoverage
+            .collect { it.file("${it.buildDir}/jacoco/test.exec") })
+            .filter { it.exists() }
     sourceDirectories.from = project.files(projectsWithCoverage.sourceSets.main.allSource.srcDirs)
     classDirectories.from = project.files(projectsWithCoverage.sourceSets.main.output)
     reports.xml.destination = project.file("$project.buildDir/reports/jacoco/test/jacocoTestReport.xml")
-    reports.xml.enabled = true
+    reports.xml.required.set(true)
     reports.html.destination = project.file("$project.buildDir/reports/jacoco/test/html/")
 }
 
