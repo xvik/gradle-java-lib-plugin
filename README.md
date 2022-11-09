@@ -62,7 +62,7 @@ buildscript {
       gradlePluginPortal()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:2.3.0'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:2.3.1'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -72,7 +72,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '2.3.0'
+    id 'ru.vyarus.java-lib' version '2.3.1'
 }
 ```
 
@@ -82,7 +82,7 @@ Plugin compiled for java 8, compatible with java 11
 
 Gradle | Version
 --------|-------
-5.1     | 2.3.0
+5.1     | 2.3.1
 4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
 older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
 
