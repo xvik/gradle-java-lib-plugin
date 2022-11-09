@@ -1,3 +1,5 @@
+* Updated pom plugin (2.2.2): support repositories declaration in settings file only
+
 ### 2.3.0 (2021-11-01)
 * Updated pom plugin (2.2.1): automatic detection of incorrect pom closure usage
 * Fix gradle 7 warnings
