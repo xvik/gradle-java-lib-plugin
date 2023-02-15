@@ -19,7 +19,9 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.publish.tasks.GenerateModuleMetadata
+import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.Report
+import org.gradle.api.reporting.SingleFileReport
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
@@ -430,9 +432,15 @@ class JavaLibPlugin implements Plugin<Project> {
                     description = 'Generates aggregated test report'
                     // show task in common place
                     group = 'verification'
-                    destinationDir = project.file("${project.buildDir}/reports/tests/test")
-                    reportOn project.subprojects
-                            .findAll { it.plugins.hasPlugin(JavaPlugin) }.test
+                    if (GradleVersion.current() < GradleVersion.version('8.0')) {
+                        destinationDir = project.file("${project.buildDir}/reports/tests/test")
+                        reportOn project.subprojects
+                                .findAll { it.plugins.hasPlugin(JavaPlugin) }.test
+                    } else {
+                        destinationDirectory.set(project.layout.buildDirectory.dir('reports/tests/test'))
+                        testResults.from(project.subprojects
+                                .findAll { it.plugins.hasPlugin(JavaPlugin) }.test)
+                    }
                 }
             }
 
@@ -453,11 +461,9 @@ class JavaLibPlugin implements Plugin<Project> {
                         sourceDirectories.from = project.files(projectsWithCoverage.sourceSets.main.allSource.srcDirs)
                         classDirectories.from = project.files(projectsWithCoverage.sourceSets.main.output)
                         // use same location as in single-module case
-                        reports.xml.destination = project
-                                .file("$project.buildDir/reports/jacoco/test/jacocoTestReport.xml")
+                        reportDestination(reports.xml, project, 'reports/jacoco/test/jacocoTestReport.xml')
+                        reportDestination(reports.html, project, 'reports/jacoco/test/html/')
                         enableReport(reports.xml)
-                        reports.html.destination = project
-                                .file("$project.buildDir/reports/jacoco/test/html/")
                     }
                 }
             }
@@ -489,6 +495,19 @@ class JavaLibPlugin implements Plugin<Project> {
             Configuration archives = project.configurations.findByName('archives')
             if (archives && !archives.artifacts.contains(artifact)) {
                 project.artifacts.add('archives', artifact)
+            }
+        }
+    }
+
+    @SuppressWarnings('Instanceof')
+    private void reportDestination(ConfigurableReport report, Project project, String path) {
+        if (GradleVersion.current() < GradleVersion.version('8.0')) {
+            report.destination = project.file("$project.buildDir/$path")
+        } else {
+            if (report instanceof SingleFileReport) {
+                report.outputLocation.set(project.layout.buildDirectory.get().file(path))
+            } else {
+                report.outputLocation.set(project.layout.buildDirectory.dir(path))
             }
         }
     }

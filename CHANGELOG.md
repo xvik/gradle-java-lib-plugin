@@ -1,3 +1,5 @@
+* Gradle 8 compatibility
+
 ### 2.3.1 (2022-11-09)
 * Updated pom plugin (2.2.2): support repositories declaration in settings file only
 
