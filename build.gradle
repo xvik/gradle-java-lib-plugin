@@ -26,6 +26,7 @@ dependencies {
     testImplementation('org.spockframework:spock-core:2.0-groovy-2.5') {
         exclude group: 'org.codehaus.groovy'
     }
+    // update to 1.1.0 after upgrading to gradle 7.6
     testImplementation 'com.gradle.publish:plugin-publish-plugin:0.21.0'
 }
 

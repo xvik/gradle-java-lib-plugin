@@ -13,6 +13,8 @@ import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.ProjectReportsPlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -90,6 +92,7 @@ class JavaLibPlugin implements Plugin<Project> {
     private static final String GROOVYDOC_JAR = 'groovydocJar'
 
     @Override
+    @SuppressWarnings('MethodSize')
     void apply(Project project) {
         // always creating extension to avoid hard to track mis-references in multi-module projects
         JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension, project)
@@ -116,9 +119,14 @@ class JavaLibPlugin implements Plugin<Project> {
             MavenPublication publication = configureMavenPublication(project)
             configureEncoding(project)
             configureJar(project, publication)
-            addSourcesJarTask(project, publication, extension)
-            addJavadocJarTask(project, publication, extension)
-            addGroovydocJarTask(project, publication, extension)
+            if (GradleVersion.current() < GradleVersion.version('7.6')) {
+                addSourcesJarTask(project, publication, extension)
+                addJavadocJarTask(project, publication, extension)
+                addGroovydocJarTask(project, publication, extension)
+            } else {
+                // since gradle 7.6 - use native integration
+                addJavadocAndSourcesNative(project, extension)
+            }
             configureGradleMetadata(project, extension)
             disablePublication(project, extension)
             configureSigning(project, publication)
@@ -285,6 +293,31 @@ class JavaLibPlugin implements Plugin<Project> {
                 registerArtifact(project, publication, groovydocJar)
                 project.afterEvaluate {
                     groovydocJar.configure { enabled = extension.addJavadoc }
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings('Indentation')
+    private void addJavadocAndSourcesNative(Project project, JavaLibExtension extension) {
+        // use gradle native configuration method to aovid clashes with plugin-publish 1.0
+        JavaPluginExtension javaExt = project.extensions.getByType(JavaPluginExtension)
+        javaExt.withJavadocJar()
+        javaExt.withSourcesJar()
+        project.afterEvaluate {
+            if (!extension.addJavadoc || !extension.addSources) {
+                project.convention.getPlugin(JavaPluginConvention).sourceSets
+                        .named('main').configure { sourceSet ->
+                    if (!extension.addJavadoc) {
+                        project.tasks.named(sourceSet.javadocJarTaskName).configure {
+                            it.enabled = false
+                        }
+                    }
+                    if (!extension.addSources) {
+                        project.tasks.named(sourceSet.sourcesJarTaskName).configure {
+                            it.enabled = false
+                        }
+                    }
                 }
             }
         }

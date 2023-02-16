@@ -104,7 +104,7 @@ class UpstreamKitTest extends AbstractKitTest {
         deploy.exists()
         def baseName = artifactId + '-1.0'
         withoutModuleFile(deploy) ==
-                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar", "${baseName}-groovydoc.jar"] as Set<String>
+                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
     def "Check install for no sources"() {
@@ -134,7 +134,7 @@ class UpstreamKitTest extends AbstractKitTest {
         deploy.exists()
         def baseName = artifactId + '-1.0'
         withoutModuleFile(deploy) ==
-                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
+                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
     def "Check behaviour on test sources"() {
@@ -166,7 +166,7 @@ class UpstreamKitTest extends AbstractKitTest {
         deploy.exists()
         def baseName = artifactId + '-1.0'
         withoutModuleFile(deploy)  ==
-                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
+                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
     def "Check jar modification"() {
@@ -220,6 +220,42 @@ rootProject.name = "test"
 
         cleanup:
         jar?.close()
+    }
+
+    def "Check jar only publish"() {
+        setup:
+        file('src/main/java').mkdirs()
+        build """
+            plugins {
+                id 'java'
+                id 'ru.vyarus.java-lib'
+            }
+            
+            javaLib {
+                withoutJavadoc()
+                withoutSources()
+            }
+
+            group 'ru.vyarus'
+            version 1.0
+        """
+
+        when: "run pom task"
+        def result = runVer(GRADLE_VERSION, 'install')
+
+
+        String artifactId = projectName()
+        File deploy = file("build/repo/ru/vyarus/$artifactId/1.0/")
+
+        then: "task done"
+        result.task(":install").outcome == TaskOutcome.SUCCESS
+        result.output.contains("INSTALLED ru.vyarus:$artifactId:1.0")
+
+        then: "artifacts deployed"
+        deploy.exists()
+        def baseName = artifactId + '-1.0'
+        withoutModuleFile(deploy) ==
+                ["${baseName}.jar", "${baseName}.pom"] as Set<String>
     }
 
     def "Check reports aggregation"() {

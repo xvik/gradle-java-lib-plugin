@@ -1,4 +1,12 @@
 * Gradle 8 compatibility
+* Fix plugin-publish 1.0 compatibility for gradle 7.6 and above
+  (older gradle versions should use plugin-publish 0.21)
+* (breaking) For gradle 7.6 and above use native gradle registration of javadoc sources tasks
+  (withJavadocJar() and withSourcesJar()). 
+  Related changes:
+    - javadoc jar always created (even if no sources)
+    - groovydoc artifact not created (always javadoc)
+  For gradle older 7.6 legacy behaviour preserved
 
 ### 2.3.1 (2022-11-09)
 * Updated pom plugin (2.2.2): support repositories declaration in settings file only
