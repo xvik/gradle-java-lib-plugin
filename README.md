@@ -18,11 +18,10 @@ Features:
 * Maven-like `jar` configuration
     - put `pom.xml` and `pom.properties` inside jar
     - fill manifest properties 
-* Configure tasks for additional artifacts (required for maven central publish): 
-    - `sourcesJar`  
-    - `javadocJar` or (and) `groovydocJar`
-* Prepare maven publication (`maven-publish`)
-    - `maven` publication configured with all jars (jar, sources javadock or (and) groovydoc)
+* Configure javadoc and sources artifacts (required for maven central publish)
+  (for gradle 7.6 and above native gradle integrations used)
+* Prepare maven publication (`maven-publish` plugin configuration)
+    - `maven` publication configured with all jars (jar, sources javadoc)
 * Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) which:   
     - Fix [dependencies scopes](https://github.com/xvik/gradle-pom-plugin/#dependencies) 
     in generated pom
@@ -62,7 +61,7 @@ buildscript {
       gradlePluginPortal()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:2.3.1'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:2.4.0'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -72,7 +71,7 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '2.3.1'
+    id 'ru.vyarus.java-lib' version '2.4.0'
 }
 ```
 
@@ -82,9 +81,11 @@ Plugin compiled for java 8, compatible with java 11
 
 Gradle | Version
 --------|-------
-5.1     | 2.3.1
+5.1-8   | 2.4.0
 4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
 older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
+
+NOTE: plugin-publish 1.x would work properly only with gradle 7.6 or above
 
 #### Snapshots
 
@@ -201,8 +202,7 @@ Activates with [java](https://docs.gradle.org/current/userguide/java_plugin.html
 [java-library](https://docs.gradle.org/current/userguide/java_library_plugin.html) plugin.  
 Typical usage: single-module gradle project which must be published to maven central (or any other maven repo) 
 
-* Adds `javadocJar` task (maybe `groovydocJar`) task for javadocs publishing
-* Adds `sourcesJar` task for sources publishing  
+* Adds `javadoc` and `sources` for publication
 * Registers `maven` publication for pom, jar, javadoc and sources artifacts
 * Applies UTF-8 encoding for java/groovy compile, javadoc/groovydoc and test executions
 * If [signing](https://docs.gradle.org/current/userguide/signing_plugin.html) plugin active, [configures publication signing](#signing) (required for maven central publication)
@@ -519,6 +519,18 @@ publishing.publications.maven.artifacts = [jar, javadocJar]
 
 NOTE that for maven central publication sources and javadocs are required
 
+To ADD artifacts for publication, configure them directly for publication:
+
+```groovy
+publishing {
+    publications.maven {
+        artifact buildDelivery { archiveClassifier.set('zip') }
+    }
+}
+```
+
+Here the result of `buildDelivery` task (of type `Zip`) **added** to `maven` publication with `zip` classifier.
+
 #### Gradle metadata
 
 Since gradle 6, gradle would always publish its [metadata](https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html):
@@ -598,25 +610,60 @@ publication per declared plugin to publish [plugin marker artifact](https://docs
 Java-lib plugin will still create separate publication `maven` and you should use it for publishing with bintray 
 (same way as for usual library)
 
-There might be several situations...
+##### Publishing to gradle plugin repository
 
-##### Gradle plugin repository
+For publishing in gradle plugin repository you will use [com.gradle.plugin-publish](https://plugins.gradle.org/docs/publish-plugin)
+plugin.
 
-For publishing in gradle plugin repository you will use [com.gradle.plugin-publish](https://plugins.gradle.org/docs/publish-plugin) 
-plugin. This plugin normally adds its own source and javadoc tasks.
+**IMPORTANT**: plugin-publish 1.x is supported for gradle 7.6 and above, for lower gradle use 0.x
 
-Java-lib plugin will prevent additional sources and javadoc tasks creation. `plugin-publish`
-use artifacts from `Project.artifacts` and java-lib will register all required artifacts there.
-So overall `maven` publication and artifacts applied to plugins portal will be the same.
+Use `maven` publication for publishing into maven central or other repo (optional). Plugin-publish
+will use it's `plugin-maven` publication for plugins portal publication. Both publications
+would contain the same artifacts.
 
-Use `maven` publication into maven central or jcenter (or other repo). Ignore `pluginMaven` (containing just one jar).
+Example for publishing in maven central and plugin portal (gradle 7.6 or above):
+
+```groovy
+plugins {
+  id 'com.gradle.plugin-publish' version '0.21.0'
+  id 'java-gradle-plugin'
+  id 'ru.vyarus.java-lib' version '2.4.0'
+}
+
+repositories { mavenLocal(); mavenCentral(); gradlePluginPortal() }
+
+group = 'com.foo'
+description = 'Short description'
+
+gradlePlugin {
+  plugins {
+    myPlugin {
+      id = 'com.foo.plugin'
+      displayName = project.description
+      description = 'Long description'
+      tags.set(['something'])
+      implementationClass = 'com.foo.MyPlugin'
+    }
+  }
+}
+```
+
+Here `publishMavenPublicationToMavenRepository` would publish to repository and `publishPlugins` publish into plugins portal.
+
+Assuming custom `maven` (name!) repository is configured:
+
+```groovy
+publishing {
+  repositories { maven { url "http://some.repo/"} }
+}
+```
 
 ##### Publishing only to custom repo
 
-This is in-house plugin case, when plugins are published only into corparate repository.
+This is in-house plugin case, when plugin is published only into corporate repository.
 
-In this case, you most likely will not use bintray and so can't configure exact publication name.
 The simplest solution is to disable `pluginMaven` publication tasks (but marker artifact publications should remain!)
+and publish only remaining `maven` publication:
 
 ```groovy
 tasks.withType(AbstractPublishToMaven) { Task task ->
@@ -630,8 +677,19 @@ This will disable: `publishPluginMavenPublicationToMavenLocal` and `publishPlugi
 
 And you can simply use `publish` task to trigger all required publications without duplicates.
 
-The same way, `install` will install all required artifacts locally (includin markers) and so it is possible
-to use plugins from local maven repository too (with plugin syntax).
+The same way, `install` will install all required artifacts locally (including markers) and so it is possible
+to use plugins from local maven repository too (with plugin syntax):
+
+add to settings.gradle:
+
+```groovy
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+```
 
 ### Encodings
 
@@ -648,15 +706,12 @@ For tests, encoding is important (especially on windows) because test forked pro
 
 ### Tasks 
 
-- `sourcesJar` task always applied 
-- `javadocJar` if java sources directory present ('src/main/java')
-- `groovydocJar` if groovy plugin available and groovy sources present ('src/main/groovy'). Last condition is important because groovy may be used only for tests.
+NOTE: for gradle 7.6 and above [native javadoc and sources registration used](https://docs.gradle.org/current/userguide/java_plugin.html#packaging)
+
+- `sourcesJar`  
+- `javadocJar` for gradle < 7.6 might not be applied of no java sources 
+- `groovydocJar` (for gradle < 7.6) if groovy plugin available and groovy sources present ('src/main/groovy'). Last condition is important because groovy may be used only for tests.
 - `openDependencyReport` if `project-report` plugin active - opens html dependency report in browser
-
-IMPORTANT: if you have only groovy sources then `groovydocJar` will have javadoc` classifier! This is because maven central requires
-javadoc jar, so even if you write groovy project you have to name it javadoc.
-
-In case of both groovy and java sources, `groovydocJar` will use `groovydoc` classifier, because `javadocJar` already use `javadoc` and have to produce separate artifacts.   
 
 `install` task added to simplify publication to local maven repository: this is simply shortcut for
 gradle's [publishToMavenLocal](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks) task

@@ -1,3 +1,4 @@
+### 2.4.0 (2023-02-16)
 * Gradle 8 compatibility
 * Fix plugin-publish 1.0 compatibility for gradle 7.6 and above
   (older gradle versions should use plugin-publish 0.21)
