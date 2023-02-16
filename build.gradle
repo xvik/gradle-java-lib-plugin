@@ -9,7 +9,7 @@ plugins {
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'ru.vyarus.java-lib' version '2.3.1'
     id 'ru.vyarus.github-info' version '1.5.0'
-    id 'com.github.ben-manes.versions' version '0.44.0'
+    id 'com.github.ben-manes.versions' version '0.45.0'
     id "pl.droidsonroids.jacoco.testkit" version "1.0.9"
 }
 
@@ -26,6 +26,7 @@ dependencies {
     testImplementation('org.spockframework:spock-core:2.0-groovy-2.5') {
         exclude group: 'org.codehaus.groovy'
     }
+    // update to 1.1.0 after upgrading to gradle 7.6
     testImplementation 'com.gradle.publish:plugin-publish-plugin:0.21.0'
 }
 

@@ -13,13 +13,17 @@ import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.ProjectReportsPlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.publish.tasks.GenerateModuleMetadata
+import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.Report
+import org.gradle.api.reporting.SingleFileReport
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
@@ -88,6 +92,7 @@ class JavaLibPlugin implements Plugin<Project> {
     private static final String GROOVYDOC_JAR = 'groovydocJar'
 
     @Override
+    @SuppressWarnings('MethodSize')
     void apply(Project project) {
         // always creating extension to avoid hard to track mis-references in multi-module projects
         JavaLibExtension extension = project.extensions.create('javaLib', JavaLibExtension, project)
@@ -114,9 +119,14 @@ class JavaLibPlugin implements Plugin<Project> {
             MavenPublication publication = configureMavenPublication(project)
             configureEncoding(project)
             configureJar(project, publication)
-            addSourcesJarTask(project, publication, extension)
-            addJavadocJarTask(project, publication, extension)
-            addGroovydocJarTask(project, publication, extension)
+            if (GradleVersion.current() < GradleVersion.version('7.6')) {
+                addSourcesJarTask(project, publication, extension)
+                addJavadocJarTask(project, publication, extension)
+                addGroovydocJarTask(project, publication, extension)
+            } else {
+                // since gradle 7.6 - use native integration
+                addJavadocAndSourcesNative(project, extension)
+            }
             configureGradleMetadata(project, extension)
             disablePublication(project, extension)
             configureSigning(project, publication)
@@ -288,6 +298,31 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
+    @SuppressWarnings('Indentation')
+    private void addJavadocAndSourcesNative(Project project, JavaLibExtension extension) {
+        // use gradle native configuration method to aovid clashes with plugin-publish 1.0
+        JavaPluginExtension javaExt = project.extensions.getByType(JavaPluginExtension)
+        javaExt.withJavadocJar()
+        javaExt.withSourcesJar()
+        project.afterEvaluate {
+            if (!extension.addJavadoc || !extension.addSources) {
+                project.convention.getPlugin(JavaPluginConvention).sourceSets
+                        .named('main').configure { sourceSet ->
+                    if (!extension.addJavadoc) {
+                        project.tasks.named(sourceSet.javadocJarTaskName).configure {
+                            it.enabled = false
+                        }
+                    }
+                    if (!extension.addSources) {
+                        project.tasks.named(sourceSet.sourcesJarTaskName).configure {
+                            it.enabled = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private MavenPublication configureMavenPublication(Project project) {
         // java-gradle-plugin will create its own publication pluginMaven, but still plugin configures separate
         // maven publication because java-gradle-plugin most likely will be applied after java-lib and so
@@ -430,9 +465,15 @@ class JavaLibPlugin implements Plugin<Project> {
                     description = 'Generates aggregated test report'
                     // show task in common place
                     group = 'verification'
-                    destinationDir = project.file("${project.buildDir}/reports/tests/test")
-                    reportOn project.subprojects
-                            .findAll { it.plugins.hasPlugin(JavaPlugin) }.test
+                    if (GradleVersion.current() < GradleVersion.version('8.0')) {
+                        destinationDir = project.file("${project.buildDir}/reports/tests/test")
+                        reportOn project.subprojects
+                                .findAll { it.plugins.hasPlugin(JavaPlugin) }.test
+                    } else {
+                        destinationDirectory.set(project.layout.buildDirectory.dir('reports/tests/test'))
+                        testResults.from(project.subprojects
+                                .findAll { it.plugins.hasPlugin(JavaPlugin) }.test)
+                    }
                 }
             }
 
@@ -453,11 +494,9 @@ class JavaLibPlugin implements Plugin<Project> {
                         sourceDirectories.from = project.files(projectsWithCoverage.sourceSets.main.allSource.srcDirs)
                         classDirectories.from = project.files(projectsWithCoverage.sourceSets.main.output)
                         // use same location as in single-module case
-                        reports.xml.destination = project
-                                .file("$project.buildDir/reports/jacoco/test/jacocoTestReport.xml")
+                        reportDestination(reports.xml, project, 'reports/jacoco/test/jacocoTestReport.xml')
+                        reportDestination(reports.html, project, 'reports/jacoco/test/html/')
                         enableReport(reports.xml)
-                        reports.html.destination = project
-                                .file("$project.buildDir/reports/jacoco/test/html/")
                     }
                 }
             }
@@ -489,6 +528,19 @@ class JavaLibPlugin implements Plugin<Project> {
             Configuration archives = project.configurations.findByName('archives')
             if (archives && !archives.artifacts.contains(artifact)) {
                 project.artifacts.add('archives', artifact)
+            }
+        }
+    }
+
+    @SuppressWarnings('Instanceof')
+    private void reportDestination(ConfigurableReport report, Project project, String path) {
+        if (GradleVersion.current() < GradleVersion.version('8.0')) {
+            report.destination = project.file("$project.buildDir/$path")
+        } else {
+            if (report instanceof SingleFileReport) {
+                report.outputLocation.set(project.layout.buildDirectory.get().file(path))
+            } else {
+                report.outputLocation.set(project.layout.buildDirectory.dir(path))
             }
         }
     }
