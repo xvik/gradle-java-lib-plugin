@@ -49,7 +49,7 @@ class JavaLibPluginTest extends AbstractTest {
         project.publishing.publications.maven
 
         then: "javadoc and sources tasks created"
-        project.tasks.groovydocJar
+        project.tasks.javadocJar
         project.tasks.sourcesJar
 
         then: "install task created"
@@ -109,6 +109,6 @@ class JavaLibPluginTest extends AbstractTest {
         }
 
         then: "xml report active"
-        (project.tasks.findByName('jacocoTestReport') as JacocoReport).reports.xml.enabled
+        (project.tasks.findByName('jacocoTestReport') as JacocoReport).reports.xml.required.get()
     }
 }

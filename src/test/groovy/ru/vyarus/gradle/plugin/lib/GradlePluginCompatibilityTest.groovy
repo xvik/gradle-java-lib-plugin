@@ -26,16 +26,8 @@ class GradlePluginCompatibilityTest extends AbstractTest {
         then: "mavenJava publication registered"
         project.publishing.publications.names == ["pluginMaven"] as Set
 
-        // only for plugin-publish 0.x!
-        then: "maven-publish created it's own tasks"
-        project.tasks.publishPluginJar // sources
-        project.tasks.publishPluginJavaDocsJar
-        project.tasks.publishPluginGroovyDocsJar
-
         then: "artifacts initialized"
-//        project.publishing.publications.pluginMaven.artifacts.collect {it.file.name} == ['test.jar', 'test-sources.jar', 'test-javadoc.jar']
-        // only for plugin-publish 0.x - 1.x does not use archives
-        project.configurations.archives.allArtifacts.collect {it.file.name} == ['test.jar', 'test-sources.jar', 'test-javadoc.jar', 'test-groovydoc.jar']
+        project.publishing.publications.pluginMaven.artifacts.collect {it.file.name} as Set == ['test.jar', 'test-sources.jar', 'test-javadoc.jar'] as Set
     }
 
     def "Check plugin registration"() {
@@ -59,21 +51,11 @@ class GradlePluginCompatibilityTest extends AbstractTest {
         project.tasks.javadocJar
         project.tasks.sourcesJar
 
-        // only for plugin-publish 0.x
-        then: "maven-publish does not created it's own tasks"
-        !project.tasks.findByName('publishPluginJar') // sources
-        !project.tasks.findByName('publishPluginJavaDocsJar')
-        !project.tasks.findByName('publishPluginGroovyDocsJar')
-
         then: "install task created"
         project.tasks.install
 
         then: "artifacts initialized"
         project.publishing.publications.maven.artifacts.collect {it.file.name} as Set == ['test.jar', 'test-sources.jar', 'test-javadoc.jar'] as Set
-//        project.publishing.publications.pluginMaven.artifacts.collect {it.file.name} as Set == ['test.jar', 'test-sources.jar', 'test-javadoc.jar'] as Set
-
-        // plugin-publish 0.x would use archives for publication where all artifacts present, whereas pluginMaven publication would contain only jar
-        // for 1.x archives would be empty! but pluginMaven would be correctly configured
-        project.configurations.archives.allArtifacts.collect {it.file.name} == ['test.jar', 'test-sources.jar', 'test-javadoc.jar']
+        project.publishing.publications.pluginMaven.artifacts.collect {it.file.name} as Set == ['test.jar', 'test-sources.jar', 'test-javadoc.jar'] as Set
     }
 }

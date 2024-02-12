@@ -1,5 +1,5 @@
 plugins {
-    id 'com.gradle.plugin-publish' version '0.21.0'
+    id 'com.gradle.plugin-publish' version '1.2.1'
     id 'java-gradle-plugin'
     id 'groovy'
     id 'jacoco'
@@ -29,8 +29,7 @@ dependencies {
     testImplementation('org.spockframework:spock-core:2.3-groovy-3.0') {
         exclude group: 'org.codehaus.groovy'
     }
-    // update to 1.1.0 after upgrading to gradle 7.6
-    testImplementation 'com.gradle.publish:plugin-publish-plugin:0.21.0'
+    testImplementation 'com.gradle.publish:plugin-publish-plugin:1.2.1'
 }
 
 group = 'ru.vyarus'
@@ -77,17 +76,10 @@ gradlePlugin {
         javaLibPlugin {
             id = 'ru.vyarus.java-lib'
             displayName = project.description
+            description = 'Common gradle configuration for Java or Groovy library'
+            tags.set(['java', 'groovy', 'lib'])
             implementationClass = 'ru.vyarus.gradle.plugin.lib.JavaLibPlugin'
         }
-    }
-}
-pluginBundle {
-    description = 'Common gradle configuration for Java or Groovy library'
-    tags = ['java', 'groovy', 'lib']
-
-    mavenCoordinates {
-        groupId = project.group
-        artifactId = project.name
     }
 }
 

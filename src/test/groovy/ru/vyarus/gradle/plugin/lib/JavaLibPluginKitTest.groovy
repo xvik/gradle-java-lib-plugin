@@ -136,7 +136,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         deploy.exists()
         def baseName = artifactId + '-1.0'
         withoutModuleFile(deploy) ==
-                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar", "${baseName}-groovydoc.jar"] as Set<String>
+                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
     def "Check install for no sources"() {
@@ -166,7 +166,7 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         deploy.exists()
         def baseName = artifactId + '-1.0'
         withoutModuleFile(deploy) ==
-                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
+                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
     def "Check behaviour on test sources"() {
@@ -198,6 +198,6 @@ class JavaLibPluginKitTest extends AbstractKitTest {
         deploy.exists()
         def baseName = artifactId + '-1.0'
         withoutModuleFile(deploy) ==
-                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
+                ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 }

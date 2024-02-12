@@ -19,6 +19,11 @@ class PublicationOverrideKitTest extends AbstractKitTest {
 
             group 'ru.vyarus'
             version 1.0
+            
+            javaLib {
+                // metadata publishing would fail build with modified artifacts 
+                withoutGradleMetadata()                
+            }
 
             publishing.publications.maven.artifacts = [jar, javadocJar]
         """

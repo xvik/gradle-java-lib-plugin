@@ -2,6 +2,7 @@ package ru.vyarus.gradle.plugin.lib
 
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.TestReport
 import org.gradle.testing.jacoco.tasks.JacocoReport
 
 /**
@@ -53,9 +54,10 @@ class ReportsAggregationTest extends AbstractTest {
         cov.executionData.size() == 0
 
         then: "tests aggregation task"
-        def test = project.tasks.test
+        TestReport test = project.tasks.test
         test
-        test.testResultDirs.size() == 2
+        // testResults contains not only test reports but also coverage
+        test.testResults.files.findAll {it.name == 'binary'}.size() == 2
 
         then: "dependencies reports aggregated"
         project.htmlDependencyReport.projects.size() == 3
@@ -95,9 +97,9 @@ class ReportsAggregationTest extends AbstractTest {
         cov.executionData.size() == 0
 
         then: "tests aggregation task"
-        def test = project.tasks.test
+        TestReport test = project.tasks.test
         test
-        test.testResultDirs.size() == 1
+        test.testResults.files.findAll {it.name == 'binary'}.size() == 1
 
         then: "dependencies reports aggregated"
         project.htmlDependencyReport.projects.size() == 3

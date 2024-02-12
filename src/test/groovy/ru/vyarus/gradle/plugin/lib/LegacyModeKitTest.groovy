@@ -1,17 +1,14 @@
 package ru.vyarus.gradle.plugin.lib
 
 import org.gradle.testkit.runner.TaskOutcome
-import spock.lang.IgnoreIf
 
 /**
  * @author Vyacheslav Rusakov
  * @since 11.07.2018
  */
-@IgnoreIf({jvm.java9Compatible}) // gradle 4.6 will not work on java 11
 class LegacyModeKitTest extends AbstractKitTest {
 
-    String GRADLE_VERSION = '5.1'
-    String PLATFORM_GRADLE_VERSION = '5.2' // platform plugin was introduced in 5.2
+    String GRADLE_VERSION = '7.0'
 
     def "Check install task"() {
         setup:
@@ -40,7 +37,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
@@ -72,7 +69,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         deploy.exists()
         def baseName = artifactId + '-1.0'
         // javadoc will be produced instead of groovydoc! important for maven central
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar"] as Set<String>
     }
 
@@ -104,7 +101,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar", "${baseName}-javadoc.jar", "${baseName}-groovydoc.jar"] as Set<String>
     }
 
@@ -134,7 +131,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
     }
 
@@ -166,7 +163,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         then: "artifacts deployed"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) as Set ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-sources.jar"] as Set<String>
     }
 
@@ -199,7 +196,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         then: "artifacts deployed, but without sources"
         deploy.exists()
         def baseName = artifactId + '-1.0'
-        deploy.list() as Set ==
+        withoutModuleFile(deploy) as Set ==
                 ["${baseName}.jar", "${baseName}.pom", "${baseName}-javadoc.jar"] as Set<String>
     }
 
@@ -245,7 +242,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         fileFromClasspath('sub2/src/test/groovy/sample/SampleTest2.groovy', '/sample/SampleTest2.groovy')
 
         when: "run test task"
-        def result = runVer(PLATFORM_GRADLE_VERSION, 'test')
+        def result = runVer(GRADLE_VERSION, 'test')
 
         then: "task done"
         result.task(":test").outcome == TaskOutcome.SUCCESS
@@ -255,7 +252,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         test.exists()
 
         when: "run coverage task"
-        result = runVer(PLATFORM_GRADLE_VERSION, 'clean', 'jacocoTestReport')
+        result = runVer(GRADLE_VERSION, 'clean', 'jacocoTestReport')
 
         then: "task done"
         result.task(":jacocoTestReport").outcome == TaskOutcome.SUCCESS
@@ -266,7 +263,7 @@ class LegacyModeKitTest extends AbstractKitTest {
         cov.length() > 0
 
         when: "run dependencies task"
-        result = runVer(PLATFORM_GRADLE_VERSION, 'htmlDependencyReport')
+        result = runVer(GRADLE_VERSION, 'htmlDependencyReport')
 
         then: "task done"
         result.task(":htmlDependencyReport").outcome == TaskOutcome.SUCCESS
