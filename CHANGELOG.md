@@ -1,4 +1,7 @@
 * (BREAKING) Drop gradle 5 and 6 support
+* (BREAKING) Always use native javadoc and source jars tasks (withJavadocJar() and withSourcesJar())
+    (before, custom legacy tasks were used for gradle 7-7.6)
+* Cleanup deprecated gradle api usages
 
 ### 2.4.0 (2023-02-16)
 * Gradle 8 compatibility
