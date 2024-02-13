@@ -33,7 +33,7 @@ class ReportsAggregationKitTest extends AbstractKitTest {
                 apply plugin: 'ru.vyarus.java-lib'
                 
                 dependencies {
-                    testImplementation 'org.spockframework:spock-core:2.0-groovy-2.5'
+                    testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
                 }
                 
                 test {
