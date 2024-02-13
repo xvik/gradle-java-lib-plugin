@@ -1,11 +1,13 @@
 package ru.vyarus.gradle.plugin.lib
 
 import org.gradle.testkit.runner.TaskOutcome
+import spock.lang.IgnoreIf
 
 /**
  * @author Vyacheslav Rusakov
  * @since 11.07.2018
  */
+@IgnoreIf({jvm.java17Compatible}) // only gradle 7.3 supports java 17
 class LegacyModeKitTest extends AbstractKitTest {
 
     String GRADLE_VERSION = '7.0'
