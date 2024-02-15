@@ -1,5 +1,6 @@
 package ru.vyarus.gradle.plugin.lib
 
+import groovy.xml.XmlParser
 import org.gradle.testkit.runner.TaskOutcome
 
 /**
@@ -22,8 +23,8 @@ class PomCorrectnessKitTest extends AbstractKitTest {
                 implementation 'org.javassist:javassist:3.16.1-GA'             
             }
             
-            pom {
-                name 'sample'
+            maven.pom {
+                name = 'sample'
             }
 
             group 'ru.vyarus'

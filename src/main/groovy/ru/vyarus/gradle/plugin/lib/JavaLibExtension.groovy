@@ -3,7 +3,6 @@ package ru.vyarus.gradle.plugin.lib
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Project
-import ru.vyarus.gradle.plugin.pom.PomExtension
 
 /**
  * Java-lib plugin extension. Accessible as `javaLib` closure.
@@ -94,53 +93,12 @@ class JavaLibExtension {
     // -----------------------------------  Utility methods required for sub objects configuration
 
     /**
-     * Bom sub-object configuration. Used only with java-platform plugin when platform declared in the root project.
-     *
-     * @param config configuration closure
-     */
-    void bom(Closure<?> config) {
-        project.configure(bom, config)
-    }
-
-    /**
      * Bom  sub-object configuration. Used only with java-platform plugin when platform declared in the root project.
      *
      * @param config configuration action
      */
     void bom(Action<JavaPlatform> config) {
         config.execute(bom)
-    }
-
-    /**
-     * Shortcut for pom plugin configuration under javaLib.pom closure instead of pomGeneration (unification).
-     *
-     * @param config configuration closure
-     */
-    void pom(Closure<?> config) {
-        project.configure(pom, config)
-    }
-
-    /**
-     * Shortcut for pom plugin configuration under javaLib.pom closure instead of pomGeneration (unification).
-     *
-     * @param config configuration action
-     */
-    void pom(Action<PomExtension> config) {
-        config.execute(pom)
-    }
-
-    /**
-     * Shortcut for pom plugin configuration extension access. Required for cases like:
-     * <pre>javaLib.pom.forceVersions()</pre>
-     *
-     * @return pom plugin configuration extension
-     */
-    PomExtension getPom() {
-        PomExtension pom = project.extensions.findByType(PomExtension)
-        if (pom == null) {
-            throw new IllegalStateException("No pom plugin extension found in project '$project.name'")
-        }
-        return pom
     }
 
     /**

@@ -10,7 +10,7 @@ import java.util.zip.ZipFile
  */
 class UpstreamKitTest extends AbstractKitTest {
 
-    String GRADLE_VERSION = '8.0'
+    String GRADLE_VERSION = '8.6'
 
     def "Check install task"() {
         setup:

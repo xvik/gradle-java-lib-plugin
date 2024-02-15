@@ -40,8 +40,8 @@ class GradlePluginCompatibilityKitTest extends AbstractKitTest {
                 }
             }
             
-            pom {
-                name 'customName'
+            maven.pom {
+                name = 'customName'
             }
 
             group 'ru.vyarus'
@@ -147,8 +147,8 @@ rootProject.name = "test"
                 }
             }
             
-            pom {
-                name 'customName'
+            maven.pom {
+                name = 'customName'
             }
 
             group 'ru.vyarus'

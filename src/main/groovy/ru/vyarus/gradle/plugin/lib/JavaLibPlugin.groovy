@@ -30,6 +30,7 @@ import org.gradle.process.internal.JvmOptions
 import org.gradle.testing.jacoco.plugins.JacocoPlugin
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.gradle.util.GradleVersion
+import ru.vyarus.gradle.plugin.pom.PomExtension
 import ru.vyarus.gradle.plugin.pom.PomPlugin
 
 import java.nio.charset.StandardCharsets
@@ -129,19 +130,16 @@ class JavaLibPlugin implements Plugin<Project> {
             // allow dependencies declaration in BOM
             javaPlatform.allowDependencies()
 
-            afterEvaluate {
+            // actual processing would be delayed by xml processing time in pom plugin
+            project.extensions.getByType(PomExtension).pom {
                 if (extension.bom?.artifactId) {
                     // by default artifact name is project name and if root bom would be published it should
                     // have a different name
                     bom.artifactId = extension.bom.artifactId
-                    pom {
-                        name extension.bom.artifactId
-                    }
+                    name = extension.bom.artifactId
                 }
                 if (extension.bom?.description) {
-                    pom {
-                        description extension.bom.description
-                    }
+                    description = extension.bom.description
                 }
             }
         }

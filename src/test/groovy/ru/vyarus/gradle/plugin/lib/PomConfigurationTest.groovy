@@ -1,12 +1,13 @@
 package ru.vyarus.gradle.plugin.lib
 
+import groovy.xml.XmlParser
 import org.gradle.testkit.runner.TaskOutcome
 
 /**
  * @author Vyacheslav Rusakov
  * @since 09.06.2021
  */
-class PomConfigurationShortcutTest extends AbstractKitTest {
+class PomConfigurationTest extends AbstractKitTest {
 
     def "Check install task"() {
         setup:
@@ -23,7 +24,7 @@ class PomConfigurationShortcutTest extends AbstractKitTest {
                 implementation 'com.google.inject:guice'
             }
             
-            javaLib.pom {
+            maven {
                 removeDependencyManagement()
             }
 

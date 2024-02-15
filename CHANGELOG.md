@@ -2,6 +2,8 @@
 * (BREAKING) Always use native javadoc and source jars tasks (withJavadocJar() and withSourcesJar())
     (before, custom legacy tasks were used for gradle 7-7.6)
 * Cleanup deprecated gradle api usages
+* Update pom plugin to 3.0.0 (drops pom convention in favor of type-safe maven.pom)
+  - (BREAKING) Remove pom plugin configuration shortcut (javaLib.pom) to avoid confusion
 
 ### 2.4.0 (2023-02-16)
 * Gradle 8 compatibility

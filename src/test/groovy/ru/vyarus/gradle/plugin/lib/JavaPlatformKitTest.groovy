@@ -1,5 +1,6 @@
 package ru.vyarus.gradle.plugin.lib
 
+import groovy.xml.XmlParser
 import org.gradle.testkit.runner.TaskOutcome
 
 /**
