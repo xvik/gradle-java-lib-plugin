@@ -2,14 +2,18 @@ package ru.vyarus.gradle.plugin.lib
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.java.archives.Attributes
 import org.gradle.api.plugins.*
+import org.gradle.api.provider.Provider
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.publish.tasks.GenerateModuleMetadata
@@ -18,12 +22,14 @@ import org.gradle.api.reporting.SingleFileReport
 import org.gradle.api.reporting.dependencies.HtmlDependencyReportTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.compile.GroovyCompile
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestReport
 import org.gradle.jvm.tasks.Jar
+import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 import org.gradle.process.internal.JvmOptions
@@ -93,8 +99,10 @@ class JavaLibPlugin implements Plugin<Project> {
             configureGradleMetadata(project, extension)
             disablePublication(project, extension)
             configureSigning(project, bom)
+
+            Provider<String> name = project.provider { "$project.group:$bom.artifactId:$project.version" }
             addInstallTask(project, extension) {
-                project.logger.warn "INSTALLED $project.group:$bom.artifactId:$project.version"
+                it.logger.warn "INSTALLED ${name.get()}"
             }
         }
 
@@ -111,8 +119,10 @@ class JavaLibPlugin implements Plugin<Project> {
             configureSigning(project, publication)
             applyAutoModuleName(project, extension)
             enableJacocoXmlReport(project)
+
+            Provider<String> name = project.provider { "$project.group:$project.name:$project.version" }
             addInstallTask(project, extension) {
-                project.logger.warn "INSTALLED $project.group:$project.name:$project.version"
+                it.logger.warn "INSTALLED ${name.get()}"
             }
         }
 
@@ -130,16 +140,18 @@ class JavaLibPlugin implements Plugin<Project> {
             // allow dependencies declaration in BOM
             javaPlatform.allowDependencies()
 
+            // for configuration cache support it must be direct link to simle pojo
+            JavaLibExtension.JavaPlatform model = extension.bom
             // actual processing would be delayed by xml processing time in pom plugin
             project.extensions.getByType(PomExtension).pom {
-                if (extension.bom?.artifactId) {
+                if (model?.artifactId) {
                     // by default artifact name is project name and if root bom would be published it should
                     // have a different name
-                    bom.artifactId = extension.bom.artifactId
-                    name = extension.bom.artifactId
+                    bom.artifactId = model.artifactId
+                    name = model.artifactId
                 }
-                if (extension.bom?.description) {
-                    description = extension.bom.description
+                if (model?.description) {
+                    description = model.description
                 }
             }
         }
@@ -221,7 +233,7 @@ class JavaLibPlugin implements Plugin<Project> {
         javaExt.withSourcesJar()
         project.afterEvaluate {
             if (!extension.addJavadoc || !extension.addSources) {
-                project.extensions.getByType(JavaPluginExtension).sourceSets
+                project.extensions.getByType(SourceSetContainer)
                         .named('main').configure { sourceSet ->
                     if (!extension.addJavadoc) {
                         project.tasks.named(sourceSet.javadocJarTaskName).configure {
@@ -265,7 +277,8 @@ class JavaLibPlugin implements Plugin<Project> {
         return publication
     }
 
-    private void addInstallTask(Project project, JavaLibExtension extension, Closure last) {
+    private void addInstallTask(Project project, JavaLibExtension extension, Action<Task> last) {
+        Provider<Boolean> publication = project.provider { extension.publication }
         project.tasks.register('install') {
             it.with {
                 dependsOn 'publishToMavenLocal'
@@ -273,8 +286,8 @@ class JavaLibPlugin implements Plugin<Project> {
                 description = 'Publish to local maven repository (alias for publishToMavenLocal)'
                 doLast {
                     // show message only if publication not disabled
-                    if (extension.publication) {
-                        last.call()
+                    if (publication.get()) {
+                        last.execute(it)
                     }
                 }
             }
@@ -311,6 +324,13 @@ class JavaLibPlugin implements Plugin<Project> {
             SigningExtension ext = project.extensions.getByType(SigningExtension)
             ext.sign publication
             ext.required = { !project.version.toString().endsWith('SNAPSHOT') }
+
+            // Fix Gradle warning about signing tasks using publishing task outputs without explicit dependencies
+            // https://github.com/gradle/gradle/issues/26091
+            project.tasks.withType(AbstractPublishToMaven).configureEach {
+                TaskCollection<Sign> signingTasks = project.tasks.withType(Sign)
+                mustRunAfter(signingTasks)
+            }
         }
     }
 
@@ -431,13 +451,7 @@ class JavaLibPlugin implements Plugin<Project> {
     private Set<File> selectFiles(Set<Project> projects, Closure<Set<File>> extractor) {
         Set<File> res = []
         projects.forEach {
-            res.addAll(
-                    extractor.call(
-                            GradleVersion.current() < GradleVersion.version('7.6')
-                                    ? it.sourceSets
-                                    : it.extensions.getByType(JavaPluginExtension).sourceSets // added in 7.1
-                    )
-            )
+            res.addAll(extractor.call(it.extensions.getByType(SourceSetContainer)))
         }
         res
     }

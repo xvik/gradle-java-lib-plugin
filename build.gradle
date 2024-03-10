@@ -24,7 +24,7 @@ wrapper {
 
 repositories { mavenLocal(); mavenCentral(); gradlePluginPortal() }
 dependencies {
-    implementation 'ru.vyarus:gradle-pom-plugin:3.0.0-SNAPSHOT'
+    implementation 'ru.vyarus:gradle-pom-plugin:3.0.0'
 
     testImplementation('org.spockframework:spock-core:2.3-groovy-3.0') {
         exclude group: 'org.codehaus.groovy'

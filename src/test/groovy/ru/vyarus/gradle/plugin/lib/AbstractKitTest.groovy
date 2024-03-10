@@ -21,7 +21,7 @@ abstract class AbstractKitTest extends Specification {
         fileFromClasspath('gradle.properties', 'testkit-gradle.properties')
         // override maven local repository
         // (see org.gradle.api.internal.artifacts.mvnsettings.DefaultLocalMavenRepositoryLocator.getLocalMavenRepository)
-        System.setProperty("maven.repo.local", new File(testProjectDir, "build/repo").getAbsolutePath());
+        System.setProperty("maven.repo.local", new File(testProjectDir, "build/repo").getAbsolutePath())
     }
 
     def build(String file) {
