@@ -19,14 +19,14 @@ Features:
     - put `pom.xml` and `pom.properties` inside jar
     - fill manifest properties 
 * Configure javadoc and sources artifacts (required for maven central publish)
-  (for gradle 7.6 and above native gradle integrations used)
+  (with native gradle integrations)
 * Prepare maven publication (`maven-publish` plugin configuration)
     - `maven` publication configured with all jars (jar, sources javadoc)
 * Applies [pom plugin](https://github.com/xvik/gradle-pom-plugin) which:   
     - Fix [dependencies scopes](https://github.com/xvik/gradle-pom-plugin/#dependencies) 
     in generated pom
-    - Add `pom` configuration closure to [simplify pom definition](https://github.com/xvik/gradle-pom-plugin#pom-configuration).
-    - Add `withPomXml` configuration closure to use if you [need manual xml configuration](https://github.com/xvik/gradle-pom-plugin#manual-pom-modification) 
+    - Add `maven.pom` configuration to [simplify pom definition](https://github.com/xvik/gradle-pom-plugin#pom-configuration).
+    - Add `maven.withPomXml` configuration closure to use if you [need manual xml configuration](https://github.com/xvik/gradle-pom-plugin#manual-pom-modification) 
 * Add `install` task as shortcut for `publishToMavenLocal` (simpler to use)
 * Apply `UTF-8` encoding for:
     - compile tasks: `JavaCompile` and `GroovyCompile`
@@ -44,8 +44,8 @@ but plugins do *different things* (gradle plugin only provides `api` and `implem
 
 ##### Summary
 
-* Configuration closures: `pom`, `withPomXml`, `javaLib`
-* Tasks: `sourcesJar`, `javadocJar` (`groovydocJar`), `install`, `openDependencyReport`      
+* Configuration closures: `maven` (from pom plugin), `javaLib`
+* Tasks: `sourcesJar`, `javadocJar`, `install`, `openDependencyReport`      
 * [Publication](https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications): `maven`, `bom`
 * Enable plugins: [maven-publish](https://docs.gradle.org/current/userguide/publishing_maven.html),
 [ru.vyarus.pom](https://github.com/xvik/gradle-pom-plugin)
@@ -61,7 +61,7 @@ buildscript {
       gradlePluginPortal()
     }
     dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:2.4.0'
+        classpath 'ru.vyarus:gradle-java-lib-plugin:3.0.0'
     }
 }
 apply plugin: 'ru.vyarus.java-lib'
@@ -71,17 +71,18 @@ OR
 
 ```groovy
 plugins {
-    id 'ru.vyarus.java-lib' version '2.4.0'
+    id 'ru.vyarus.java-lib' version '3.0.0'
 }
 ```
 
 #### Compatibility
 
-Plugin compiled for java 8, compatible with java 11
+Plugin compiled for java 8, compatible with java 17
 
 Gradle | Version
 --------|-------
-5.1-8   | 2.4.0
+7       | 3.0.0
+5.1     | [2.4.0](https://github.com/xvik/gradle-java-lib-plugin/tree/2.4.0)
 4.6     | [1.1.2](https://github.com/xvik/gradle-java-lib-plugin/tree/1.1.2)
 older   | [1.0.5](https://github.com/xvik/gradle-java-lib-plugin/tree/1.0.5)
 
@@ -95,22 +96,6 @@ NOTE: plugin-publish 1.x would work properly only with gradle 7.6 or above
 * Go to [JitPack project page](https://jitpack.io/#ru.vyarus/gradle-java-lib-plugin)
 * Select `Commits` section and click `Get it` on commit you want to use 
     or use `master-SNAPSHOT` to use the most recent snapshot
-
-For gradle before 6.0 use `buildscript` block with required commit hash as version:
-
-```groovy
-buildscript {
-    repositories {
-        maven { url 'https://jitpack.io' }
-    }
-    dependencies {
-        classpath 'ru.vyarus:gradle-java-lib-plugin:b5a8aee24f'
-    }
-}
-apply plugin: 'ru.vyarus.java-lib'
-```
-
-For gradle 6.0 and above:
 
 * Add to `settings.gradle` (top most!) with required commit hash as version:
 
@@ -169,9 +154,9 @@ version = '1.0.0'
 description = 'My project description'
 
 // configure target pom
-pom {
-  name 'Project Name'
-  description 'My awesome project'
+maven.pom {
+  name = 'Project Name'
+  description = 'My awesome project'
   ...
 }
 
@@ -212,7 +197,7 @@ Typical usage: single-module gradle project which must be published to maven cen
     - adds `optional` and `provided` configurations (in maven sense)
     - fixes dependency scopes in the generated pom
     - moves up dependencyManagement section in the generated pom (if platforms used)
-    - adds `pom` closure for pom declaration (`withPomXml` might be used for low-level modification)
+    - adds `maven.pom` extension for pom declaration (`maven.withPomXml` might be used for low-level modification)
 * Utilities:
   - simple Auto-Module-Name declaration (java 9 modules)
   - option to disable gradle metadata publication (maven central fails on it sometimes)
@@ -234,7 +219,7 @@ group = 'your.group'
 version = '1.0.0'                       
 description = 'My project description'
 
-pom {
+maven.pom {
   ...
 }
 
@@ -353,18 +338,6 @@ javaLib {
   }
 
   /**
-   * Shortcut for ru.vyarus.pom plugin's pomGeneration configuration
-   * (visually groups configurations because pom plugin registered implicitly).
-   * See pom plugin docs for options description.
-   */
-  pom {
-    removeDependencyManagement()
-    forceVersions()
-    disableScopesCorrection()
-    disableBomsReorder()
-  }
-
-  /**
    * Used in the root project (project with child projects) to aggregate
    * test, coverage (jacoco) and dependency (project-report) reports. 
    * Requires at least `base` plugin. Will work java-platform plugin
@@ -394,27 +367,27 @@ rootProject.name = 'the-name-you-want'
 For maven-central publication you need to fill all required pom sections:
 
 ```groovy
-pom {
+maven.pom {
     // name and desciption set automatically from project, but you can override them here
     //name 'Project Name'
     //description 'My awesome project'
     licenses {
         license {
-            name "The MIT License"
-            url "http://www.opensource.org/licenses/MIT"
-            distribution 'repo'
+            name = "The MIT License"
+            url = "http://www.opensource.org/licenses/MIT"
+            distribution = 'repo'
         }
     }
     scm {
-        url 'https://github.com/me/my-repo'
-        connection 'scm:git@github.com:me/my-repo.git'
-        developerConnection 'scm:git@github.com:me/my-repo.git'
+        url = 'https://github.com/me/my-repo'
+        connection = 'scm:git@github.com:me/my-repo.git'
+        developerConnection = 'scm:git@github.com:me/my-repo.git'
     }
     developers {
         developer {
-            id "dev1"
-            name "Dev1 Name"
-            email "dev1@email.com"
+            id = "dev1"
+            name = "Dev1 Name"
+            email = "dev1@email.com"
         }
     }
 }
@@ -443,13 +416,10 @@ When you use BOMs (for dependencies versions management) with spring plugin or g
 versions and avoid `dependencyManagent` use:
 
 ```groovy
-javaLib.pom.removeDependencyManagement()
+maven.pom.removeDependencyManagement()
 ```
 
 Read more in the [pom plugin's docs](https://github.com/xvik/gradle-pom-plugin#improving-boms-usage)
-
-IMPORTANT: Pom plugin will mention `pomGeneration` closure: `javaLib.pom` is just a shortcut (to group configurations).
-Both configurations lead to the same object (and could be used simultaneously).
 
 #### BOM declaration
 
@@ -625,9 +595,9 @@ Example for publishing in maven central and plugin portal (gradle 7.6 or above):
 
 ```groovy
 plugins {
-  id 'com.gradle.plugin-publish' version '0.21.0'
+  id 'com.gradle.plugin-publish' version '1.2.1'
   id 'java-gradle-plugin'
-  id 'ru.vyarus.java-lib' version '2.4.0'
+  id 'ru.vyarus.java-lib' version '3.0.0'
 }
 
 repositories { mavenLocal(); mavenCentral(); gradlePluginPortal() }
@@ -709,8 +679,7 @@ For tests, encoding is important (especially on windows) because test forked pro
 NOTE: for gradle 7.6 and above [native javadoc and sources registration used](https://docs.gradle.org/current/userguide/java_plugin.html#packaging)
 
 - `sourcesJar`  
-- `javadocJar` for gradle < 7.6 might not be applied of no java sources 
-- `groovydocJar` (for gradle < 7.6) if groovy plugin available and groovy sources present ('src/main/groovy'). Last condition is important because groovy may be used only for tests.
+- `javadocJar` 
 - `openDependencyReport` if `project-report` plugin active - opens html dependency report in browser
 
 `install` task added to simplify publication to local maven repository: this is simply shortcut for
@@ -903,26 +872,22 @@ allprojects {
     repositories { mavenCentral(); mavenLocal() }
 
     group = 'com.test'
-
-    // delay required because java plugin is activated only in subprojects and without it
-    // pom closure would reference root project only 
-    afterEvaluate {
-      pom {
+  
+    maven.pom {
         licenses {
           license {
-            name "The MIT License"
-            url "http://www.opensource.org/licenses/MIT"
-            distribution 'repo'
+            name = "The MIT License"
+            url = "http://www.opensource.org/licenses/MIT"
+            distribution = 'repo'
           }
         }
         scm {
-          url 'https://github.com/me/my-repo.git'
-          connection 'scm:git@github.com:me/my-repo.git'
-          developerConnection 'scm:git@github.com:me/my-repo.git'
+          url = 'https://github.com/me/my-repo.git'
+          connection = 'scm:git@github.com:me/my-repo.git'
+          developerConnection = 'scm:git@github.com:me/my-repo.git'
         }
         //...
       }
-    }
 
     javaLib.withoutGradleMetadata()
 }
@@ -949,8 +914,11 @@ subprojects {
     javaLib {
         // java 9 auto module name
         autoModuleName = "com.sample.module"
+    }
+  
+    maven {
         // use only direct dependencies in the generated pom, removing BOM
-        pom.removeDependencyManagement()
+        removeDependencyManagement()
     }
 }
 ```
@@ -959,7 +927,7 @@ Here required dependency versions declared in the root project using gradle plat
 Platform published as BOM with custom artifact name (dual BOM: both project modules and dependencies).
 
 Sub-projects are java modules which use platform declared in the root project for dependency management.
-`pom.removeDependencyManagement()` prevents "leaking" platform into module poms
+`maven.removeDependencyManagement()` prevents "leaking" platform into module poms
 (generated poms would contain just required dependencies with resolved versions)
 
 `groovy` plugin used just as an example (used for spock tests, main sources might be java-only): it could be `java` or `java-library` plugin.
@@ -993,6 +961,11 @@ jar {
     }
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}        
+
 task generatePomPropertiesFile {
     inputs.properties ([
             'version': "${ -> project.version }",
@@ -1017,24 +990,6 @@ model {
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes, group: 'build') {
-	from sourceSets.main.allSource
-	classifier = 'sources'
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc, group: 'build') {
-	classifier 'javadoc'
-    from javadoc.destinationDir
-}
-
-task groovydocJar(type: Jar, dependsOn: groovydoc, group: 'build') {
-	classifier 'groovydoc'
-    from groovydoc.destinationDir 
-    options.encoding = StandardCharsets.UTF_8
-    options.charSet = StandardCharsets.UTF_8
-    options.docEncoding = StandardCharsets.UTF_8
-}    
-
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = StandardCharsets.UTF_8
 }
@@ -1047,6 +1002,15 @@ tasks.withType(Test).configureEach {
    it.systemProperty JvmOptions.FILE_ENCODING_KEY, StandardCharsets.UTF_8
 }
 
+tasks.withType(Javadoc).configureEach {
+  it.with {
+    options.encoding = StandardCharsets.UTF_8
+    // StandardJavadocDocletOptions
+    options.charSet = StandardCharsets.UTF_8
+    options.docEncoding = StandardCharsets.UTF_8
+  }
+}
+
 jar.manifest {
   attributes 'Automatic-Module-Name': 'module-name'
 }  
@@ -1054,16 +1018,17 @@ jar.manifest {
 publishing.publications {
     maven(MavenPublication) {
         from components.java
-        artifact sourcesJar	        
-        artifact javadocJar
-        artifact groovydocJar	 
     }
 }
 
 task.jacocoTestReport.xml.required.set(true)
 
-task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
-	logger.warn "INSTALLED $project.group:$project.name:$project.version"
+tasks.register('install') {
+    dependsOn: publishToMavenLocal 
+    group: 'publishing'
+    doLast {
+        logger.warn "INSTALLED $project.group:$project.name:$project.version"
+    }
 }
 ```
 
@@ -1076,9 +1041,9 @@ apply plugin: 'ru.vyarus.pom'
 
 javaPlatform.allowDependencies()
 
-pom {
-  name 'custom-name'                // if differs from project name
-  description 'custom description'
+maven.pom {
+  name = 'custom-name'                // if differs from project name
+  description = 'custom description'
 }
 
 publishing.publications {
@@ -1090,8 +1055,12 @@ publishing.publications {
 
 jacocoTestReport.reports.xml.required.set(true)
 
-task install(dependsOn: publishToMavenLocal, group: 'publishing') << {
-  logger.warn "INSTALLED $project.group:custom-name:$project.version"
+tasks.register('install') {
+  dependsOn: publishToMavenLocal
+  group: 'publishing'
+  doLast {
+    logger.warn "INSTALLED $project.group:custom-name:$project.version"
+  }
 }
 ```
 

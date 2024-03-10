@@ -1,9 +1,10 @@
+### 3.0.0 (2024-03-10)
 * (BREAKING) Drop gradle 5 and 6 support
 * (BREAKING) Always use native javadoc and source jars tasks (withJavadocJar() and withSourcesJar())
     (before, custom legacy tasks were used for gradle 7.6 and older)
 * Cleanup deprecated gradle api usages
 * Update pom plugin to 3.0.0 (drops pom convention in favor of type-safe maven.pom)
-  - (BREAKING) Remove pom plugin configuration shortcut (javaLib.pom) to avoid confusion
+  - (BREAKING) Remove pom plugin configuration shortcut (javaLib.pom) to avoid confusion (use maven extension directly)
 * Fix signing error when used with plugin-publish plugin
 * Configuration cache compatibility
 
