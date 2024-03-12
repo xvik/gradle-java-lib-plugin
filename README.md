@@ -873,21 +873,26 @@ allprojects {
 
     group = 'com.test'
   
-    maven.pom {
-        licenses {
-          license {
-            name = "The MIT License"
-            url = "http://www.opensource.org/licenses/MIT"
-            distribution = 'repo'
-          }
+    // such delay is required because java-lib (and java) plugin would be applied only
+    // in the subprojects section and so this would configure root project configuration
+    // without delay
+    plugins.withId('java') {
+        maven.pom {
+            licenses {
+                license {
+                    name = "The MIT License"
+                    url = "http://www.opensource.org/licenses/MIT"
+                    distribution = 'repo'
+                }
+            }
+            scm {
+                url = 'https://github.com/me/my-repo.git'
+                connection = 'scm:git@github.com:me/my-repo.git'
+                developerConnection = 'scm:git@github.com:me/my-repo.git'
+            }
+            //...
         }
-        scm {
-          url = 'https://github.com/me/my-repo.git'
-          connection = 'scm:git@github.com:me/my-repo.git'
-          developerConnection = 'scm:git@github.com:me/my-repo.git'
-        }
-        //...
-      }
+    }  
 
     javaLib.withoutGradleMetadata()
 }
