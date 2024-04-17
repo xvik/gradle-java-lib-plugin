@@ -97,20 +97,20 @@ NOTE: plugin-publish 1.x would work properly only with gradle 7.6 or above
 * Select `Commits` section and click `Get it` on commit you want to use 
     or use `master-SNAPSHOT` to use the most recent snapshot
 
-* Add to `settings.gradle` (top most!) with required commit hash as version:
+* Add to `settings.gradle` (top most!) (exact commit hash might be used as version):
 
   ```groovy
   pluginManagement {
       resolutionStrategy {
           eachPlugin {
-              if (requested.id.namespace == 'ru.vyarus.java-lib') {
-                  useModule('ru.vyarus:gradle-java-lib-plugin:b5a8aee24f')
+              if (requested.id.id == 'ru.vyarus.java-lib') {
+                  useModule('ru.vyarus:gradle-java-lib-plugin:master-SNAPSHOT')
               }
           }
       }
-      repositories {
-          maven { url 'https://jitpack.io' }
-          gradlePluginPortal()          
+      repositories {                        
+          gradlePluginPortal()
+          maven { url 'https://jitpack.io' }                    
       }
   }    
   ``` 
