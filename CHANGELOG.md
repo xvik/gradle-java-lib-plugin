@@ -1,3 +1,5 @@
+* Fix gradle 9 compatibility
+
 ### 3.0.0 (2024-03-10)
 * (BREAKING) Drop gradle 5 and 6 support
 * (BREAKING) Always use native javadoc and source jars tasks (withJavadocJar() and withSourcesJar())
