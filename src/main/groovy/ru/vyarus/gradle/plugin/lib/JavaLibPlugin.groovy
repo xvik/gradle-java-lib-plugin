@@ -180,6 +180,7 @@ class JavaLibPlugin implements Plugin<Project> {
         }
     }
 
+    @SuppressWarnings('AbcMetric')
     private void configureJar(Project project, MavenPublication publication) {
         Provider<String> version = project.provider { project.version }
         Provider<String> group = project.provider { project.group }
