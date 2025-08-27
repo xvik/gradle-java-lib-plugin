@@ -285,7 +285,8 @@ rootProject.name = "test"
                 apply plugin: 'ru.vyarus.java-lib'
                 
                 dependencies {
-                    testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
+                    testImplementation 'org.spockframework:spock-core:2.4-M6-groovy-3.0'
+                    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
                 }
                 
                 test {
