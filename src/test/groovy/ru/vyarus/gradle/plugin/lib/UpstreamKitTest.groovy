@@ -1,6 +1,7 @@
 package ru.vyarus.gradle.plugin.lib
 
 import org.gradle.testkit.runner.TaskOutcome
+import spock.lang.Requires
 
 import java.util.zip.ZipFile
 
@@ -8,9 +9,10 @@ import java.util.zip.ZipFile
  * @author Vyacheslav Rusakov
  * @since 13.11.2019
  */
+@Requires({jvm.java17Compatible})
 class UpstreamKitTest extends AbstractKitTest {
 
-    String GRADLE_VERSION = '8.6'
+    String GRADLE_VERSION = '9.0.0'
 
     def "Check install task"() {
         setup:
